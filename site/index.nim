@@ -11,38 +11,9 @@ proc NavLink(href, text: string): auto =
   buildHtml:
     a(class="nav-link", href=href): text
 
-proc Section(id, title: string; body: proc(): auto): auto =
-  buildHtml:
-    section(id=id):
-      h2: title
-      body()
-
 # ---------------------------------------------------------------------------
 # Components
 # ---------------------------------------------------------------------------
-
-proc HelixLogo(): auto =
-  buildHtml:
-    svg(viewBox="0 0 200 320", xmlns="http://www.w3.org/2000/svg", aria-hidden="true", class="helix-logo"):
-      defs:
-        linearGradient(id="hgrad", x1="0%", y1="0%", x2="100%", y2="100%"):
-          stop(offset="0%", style="stop-color:#c73e1d;stop-opacity:1")
-          stop(offset="100%", style="stop-color:#5d2e8c;stop-opacity:1")
-      g(fill="none", stroke="url(#hgrad)", stroke-width="2.5", stroke-linecap="round"):
-        path(d="M100 20 Q140 60 100 100 Q60 140 100 180 Q140 220 100 260 Q60 300 100 300")
-        path(d="M100 20 Q60 60 100 100 Q140 140 100 180 Q60 220 100 260 Q140 300 100 300")
-      g(fill="#c73e1d"):
-        circle(cx="100", cy="20", r="5")
-        circle(cx="100", cy="100", r="5")
-        circle(cx="100", cy="180", r="5")
-        circle(cx="100", cy="260", r="5")
-      g(fill="#5d2e8c"):
-        circle(cx="72", cy="60", r="5")
-        circle(cx="128", cy="60", r="5")
-        circle(cx="72", cy="140", r="5")
-        circle(cx="128", cy="140", r="5")
-        circle(cx="72", cy="220", r="5")
-        circle(cx="128", cy="220", r="5")
 
 proc HeroSection(): auto =
   buildHtml:
@@ -57,21 +28,15 @@ proc HeroSection(): auto =
         a(href="#quickstart", class="btn-primary"): "Get Started"
         a(href="https://github.com/nim-works/helix", class="btn-secondary"): "GitHub"
 
-proc IntroSection(): auto =
+proc WhatIsSection(): auto =
   buildHtml:
-    section(class="container"):
-      h2: "Rethinking Reactivity"
+    section(class="container", id="what-is"):
+      h2: "What is Helix"
       p:
         "Helix generates fine-grained DOM updates at compile time using Nim's macro system. " &
         "No virtual DOM. No diffing algorithm. Just precise, signal-driven mutations emitted directly from your templates."
       p:
-        "It is isomorphic by default: the same component code compiles to both a " &
-        "C server binary emitting HTML strings and a JS client bundle mounting real DOM."
-
-proc FeaturesSection(): auto =
-  buildHtml:
-    section(class="container"):
-      h2: "Design Principles"
+        "The same component code compiles to both a C server binary emitting HTML strings and a JS client bundle mounting real DOM."
       `div`(class="features-grid"):
         `div`(class="feature-card"):
           h3: "Compile-Time Codegen"
@@ -96,29 +61,45 @@ proc CodeExample(title: string; code: string): auto =
         pre:
           code(class="language-nim"): code
 
+proc LiveExample(title, code: string; demoId: string): auto =
+  buildHtml:
+    `div`(class="example-playground"):
+      `div`(class="code-col"):
+        CodeExample(title, code)
+      `div`(class="demo-col"):
+        `div`(class="demo-col-label"): "Live Result"
+        `div`(id=demoId)
+
 proc ExamplesSection(): auto =
   buildHtml:
     section(class="container", id="examples"):
-      h2: "Live Examples"
+      h2: "See It In Action"
       p: "Helix templates look like HTML but compile to zero-overhead DOM operations."
 
-      CodeExample("A simple component",
-        "proc greeting(): auto =\n" &
-        "  buildHtml:\n" &
-        "    h1: \"Hello, Helix\"\n" &
-        "\n" &
-        "# Renders: <h1>Hello, Helix</h1>")
-
-      CodeExample("Reactive signals",
+      LiveExample("Reactive signals",
         "let count = signal(0)\n" &
         "\n" &
         "proc Counter(): auto =\n" &
         "  buildHtml:\n" &
         "    button(\n" &
         "      onclick = proc(ev: Event) = count.set(count() + 1)\n" &
-        "    ): \"Clicked \" & $count() & \" times\"")
+        "    ): \"Clicked \" & $count() & \" times\"",
+        "demo-counter")
 
-      CodeExample("Control flow",
+      LiveExample("Data binding",
+        "let name = signal(\"\")\n" &
+        "\n" &
+        "proc Greeting(): auto =\n" &
+        "  buildHtml:\n" &
+        "    input(\n" &
+        "      type = \"text\",\n" &
+        "      oninput = proc(ev: Event) =\n" &
+        "        name.set($ev.target.value)\n" &
+        "    )\n" &
+        "    p: \"Hello, \" & $name()",
+        "demo-binding")
+
+      LiveExample("Control flow",
         "let show = signal(true)\n" &
         "\n" &
         "proc Conditional(): auto =\n" &
@@ -128,26 +109,16 @@ proc ExamplesSection(): auto =
         "    else:\n" &
         "      p: \"Hidden\"\n" &
         "    for i in 1..3:\n" &
-        "      li: $i")
+        "      li: $i",
+        "demo-conditional")
 
-      CodeExample("Islands for hydration",
-        "import helix\n" &
-        "\n" &
-        "# Mark a component as an interactive island\n" &
-        "@island\n" &
-        "proc LikeButton(): auto =\n" &
-        "  let likes = signal(42)\n" &
-        "  buildHtml:\n" &
-        "    button: \"❤️ \" & $likes()\n" &
-        "\n" &
-        "# Use it in a page — SSR emits markers, client hydrates\n" &
-        "island LikeButton()")
-
-proc HowItWorksSection(): auto =
+proc UnderTheHoodSection(): auto =
   buildHtml:
-    section(class="container", id="how-it-works"):
-      h2: "How It Works"
-      p: "Three layers. One source file. Two compiled outputs."
+    section(class="container", id="internals"):
+      h2: "Under The Hood"
+      p: "Three stages. Three layers. One source file. Two compiled outputs."
+
+      h3: "The Pipeline"
       `div`(class="pipeline"):
         `div`(class="pipeline-step"):
           span(class="pipeline-num"): "01"
@@ -164,11 +135,7 @@ proc HowItWorksSection(): auto =
           h3: "Codegen"
           p: "Backend-specific codegen emits DOM code (JS) or string builders (C)."
 
-proc ArchitectureSection(): auto =
-  buildHtml:
-    section(class="container"):
-      h2: "Architecture"
-      p: "Helix is structured in three layers that mirror the journey from Nim source to running UI."
+      h3: "The Stack"
       `div`(class="layer-stack"):
         `div`(class="layer layer-app"):
           `div`(class="layer-num"): "1"
@@ -185,54 +152,60 @@ proc ArchitectureSection(): auto =
           `div`(class="layer-body"):
             h4: "Runtime Layer"
             p: "Signals · DOM Runtime · SSR Renderer · Hydrator"
+
       p:
         "The parser transforms the "
         code: "buildHtml"
-        " DSL into an intermediate representation. The analyzer detects dynamic text, attributes, events, and islands. Finally, backend-specific codegen emits either DOM creation code (JS) or fast string-building code (C)."
+        " DSL into an intermediate representation. " &
+        "The analyzer detects dynamic text, attributes, events, and islands. " &
+        "Backend-specific codegen emits either DOM creation code (JS) or fast string-building code (C). " &
+        "Components marked with "
+        code: "@island"
+        " are emitted with hydration markers so the client only rehydrates the interactive parts."
 
 proc BenchmarkSection(): auto =
   buildHtml:
     section(class="container", id="benchmarks"):
-      h2: "How Helix Compares"
+      h2: "The Numbers"
       p: "Compile-time codegen eliminates the runtime overhead that other frameworks carry."
       `div`(class="benchmark-table-wrap"):
         table(class="benchmark-table"):
           thead:
             tr:
               th: ""
-              th: "Runtime Size"
+              th: "Runtime"
               th: "VDOM"
               th: "SSR"
               th: "Hydration"
-              th: "Language"
+              th: "Lang"
           tbody:
             tr:
               td: "React"
               td: "~40 KB"
               td: "Yes"
               td: "Yes"
-              td: "Full app"
+              td: "Full"
               td: "JS"
             tr:
               td: "Vue"
               td: "~30 KB"
               td: "Yes"
               td: "Yes"
-              td: "Full app"
+              td: "Full"
               td: "JS"
             tr:
               td: "Svelte"
               td: "~5 KB"
               td: "No"
               td: "Yes"
-              td: "Full app"
+              td: "Full"
               td: "JS"
             tr:
               td: "Solid"
               td: "~7 KB"
               td: "No"
               td: "Yes"
-              td: "Full app"
+              td: "Full"
               td: "JS"
             tr:
               td(class="highlight"): "Helix"
@@ -245,7 +218,7 @@ proc BenchmarkSection(): auto =
 proc QuickstartSection(): auto =
   buildHtml:
     section(class="container", id="quickstart"):
-      h2: "Quick Start"
+      h2: "Get Started"
       `div`(class="quickstart"):
         h3: "Install"
         `div`(class="code-snippet"):
@@ -260,15 +233,6 @@ proc QuickstartSection(): auto =
           pre: "echo greeting()  # → <h1>Hello, Helix</h1>"
           button(class="copy-btn", data-clipboard="echo greeting()"): "Copy"
 
-proc TryItSection(): auto =
-  buildHtml:
-    section(class="container", id="try-it"):
-      h2: "Try It"
-      p:
-        "These demos are rendered on the server, then hydrated on the client. " &
-        "Type in the input or click the button — only the changed DOM nodes update."
-      `div`(id="demo-mount")
-
 proc FooterSection(): auto =
   buildHtml:
     footer(class="container"):
@@ -278,9 +242,9 @@ proc FooterSection(): auto =
           p: "Compile-time reactive web framework for Nim."
         `div`(class="footer-col"):
           h4: "Resources"
-          a(href="#quickstart"): "Quick Start"
+          a(href="#quickstart"): "Get Started"
           a(href="#examples"): "Examples"
-          a(href="#how-it-works"): "How It Works"
+          a(href="#internals"): "Internals"
         `div`(class="footer-col"):
           h4: "Community"
           a(href="https://github.com/nim-works/helix"): "GitHub"
@@ -310,20 +274,17 @@ proc indexPage*(): auto =
               span(class="nav-brand-icon"): "◈"
               span(class="nav-brand-text"): "Helix"
             `div`(class="nav-links"):
+              NavLink("#what-is", "What is Helix")
               NavLink("#examples", "Examples")
-              NavLink("#how-it-works", "How It Works")
-              NavLink("#quickstart", "Quick Start")
-              NavLink("#try-it", "Try It")
+              NavLink("#internals", "Internals")
+              NavLink("#quickstart", "Get Started")
               a(href="https://github.com/nim-works/helix", class="nav-link nav-link-gh"): "GitHub"
         HeroSection()
-        IntroSection()
-        FeaturesSection()
+        WhatIsSection()
         ExamplesSection()
-        HowItWorksSection()
-        ArchitectureSection()
+        UnderTheHoodSection()
         BenchmarkSection()
         QuickstartSection()
-        TryItSection()
         FooterSection()
         script(src="client.js")
         script(type="text/javascript"):

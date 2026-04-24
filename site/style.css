@@ -29,16 +29,21 @@ body {
    Typography
    --------------------------------------------------------------------------- */
 
-h1, h2, h3 {
+h1, h2 {
   font-family: "Shrikhand", Georgia, serif;
   font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: 0.02em;
+  line-height: 1.05;
 }
 
 h1 { font-size: clamp(4rem, 10vw + 1rem, 9rem); }
 h2 { font-size: clamp(2.5rem, 4vw + 0.5rem, 4.5rem); margin-top: 0; }
-h3 { font-size: clamp(1.3rem, 2vw + 0.5rem, 1.8rem); }
+
+h3 {
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.2rem, 1.5vw + 0.5rem, 1.5rem);
+  line-height: 1.3;
+}
 
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
@@ -69,9 +74,9 @@ a:hover { text-decoration: underline; }
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: "Shrikhand", Georgia, serif;
-  font-weight: 400;
-  font-size: 1.4rem;
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
   color: var(--fg);
 }
 
@@ -91,10 +96,8 @@ a:hover { text-decoration: underline; }
 
 .nav-link {
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   transition: color 0.15s ease;
 }
 
@@ -202,10 +205,8 @@ a:hover { text-decoration: underline; }
   display: inline-block;
   padding: 0.7rem 1.75rem;
   border-radius: 4px;
-  font-weight: 800;
+  font-weight: 600;
   font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
   transition: transform 0.15s ease;
   border: 3px solid var(--border);
   cursor: pointer;
@@ -264,7 +265,7 @@ section h2 {
 
 section > p,
 .intro-text {
-  max-width: 680px;
+  max-width: 65ch;
   margin-bottom: 1.5em;
   color: var(--muted);
   font-size: 1.15rem;
@@ -315,9 +316,9 @@ section > p,
 }
 
 .feature-card h3 {
-  font-family: "Shrikhand", Georgia, serif;
-  font-weight: 400;
-  font-size: 1.25rem;
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
   margin-bottom: 0.5em;
   color: var(--fg);
 }
@@ -327,6 +328,47 @@ section > p,
   color: var(--muted);
   margin: 0;
   line-height: 1.6;
+}
+
+/* ---------------------------------------------------------------------------
+   Example playground (2-column code + live demo)
+   --------------------------------------------------------------------------- */
+
+.example-playground {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1.5rem;
+  margin: 2rem 0;
+  align-items: start;
+}
+
+.code-col .code-example {
+  margin: 0;
+}
+
+.demo-col {
+  background: var(--surface);
+  border: 3px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  min-height: 200px;
+}
+
+.demo-col-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border);
+}
+
+@media (max-width: 768px) {
+  .example-playground {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -350,10 +392,8 @@ section > p,
 }
 
 .code-title {
-  font-size: 0.85rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--fg);
 }
 
@@ -435,9 +475,9 @@ section > p,
 }
 
 .pipeline-step h3 {
-  font-family: "Shrikhand", Georgia, serif;
-  font-weight: 400;
-  font-size: 1.2rem;
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
   margin-bottom: 0.5em;
 }
 
@@ -453,9 +493,8 @@ section > p,
   justify-content: center;
   font-size: 2rem;
   color: var(--accent);
-  font-weight: 800;
+  font-weight: 700;
   align-self: center;
-  font-family: "Shrikhand", Georgia, serif;
 }
 
 @media (max-width: 768px) {
@@ -475,10 +514,10 @@ section > p,
 }
 
 .quickstart h3 {
-  font-family: "Shrikhand", Georgia, serif;
-  font-weight: 400;
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
   margin-bottom: 1em;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .code-snippet {
@@ -506,10 +545,8 @@ section > p,
   border: 2px solid var(--border);
   border-radius: 4px;
   padding: 0.35rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -551,10 +588,8 @@ section > p,
 
 .benchmark-table th {
   background: var(--surface);
-  font-weight: 800;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  font-size: 0.8rem;
   color: var(--muted);
 }
 
@@ -592,9 +627,9 @@ footer {
 }
 
 .footer-col h4 {
-  font-family: "Shrikhand", Georgia, serif;
-  font-weight: 400;
-  font-size: 1.1rem;
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
   margin-bottom: 1rem;
   color: var(--fg);
 }
@@ -688,9 +723,9 @@ footer {
 }
 
 .layer-body h4 {
-  font-family: "Shrikhand", Georgia, serif;
-  font-weight: 400;
-  font-size: 1.1rem;
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
   margin-bottom: 0.25em;
   color: var(--fg);
 }
@@ -729,11 +764,9 @@ code {
 }
 
 .demo-row h4 {
-  font-family: "Shrikhand", Georgia, serif;
-  font-weight: 400;
-  font-size: 1.1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
   color: var(--muted);
   margin-bottom: 1rem;
 }

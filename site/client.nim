@@ -52,9 +52,12 @@ when defined(js):
     root
 
   # --- Mount ---
-  let mount = document.querySelector(cstring"#demo-mount")
-  if mount != nil:
-    mount.innerHTML = ""
-    mount.appendChild(CounterDemo())
-    mount.appendChild(BindingDemo())
-    mount.appendChild(ConditionalDemo())
+  proc mountDemo(id: string; factory: proc(): auto) =
+    let el = document.querySelector(cstring("#" & id))
+    if el != nil:
+      el.innerHTML = ""
+      el.appendChild(factory())
+
+  mountDemo("demo-counter", CounterDemo)
+  mountDemo("demo-binding", BindingDemo)
+  mountDemo("demo-conditional", ConditionalDemo)
