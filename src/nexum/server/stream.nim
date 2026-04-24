@@ -1,4 +1,4 @@
-## Helix Server — Streaming SSR helpers.
+## Nexum Server — Streaming SSR helpers.
 ##
 ## Provides chunked transfer for large pages or async data boundaries.
 

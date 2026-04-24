@@ -1,9 +1,9 @@
-## Helix Runtime — Hydration: scanning SSR markers and attaching signal bindings.
+## Nexum Runtime — Hydration: scanning SSR markers and attaching signal bindings.
 ##
 ## SSR outputs comments like:
-##   <!--helix-island start="Counter_7a3f" props='{...}'-->
+##   <!--nexum-island start="Counter_7a3f" props='{...}'-->
 ##   <button>0</button>
-##   <!--helix-island end="Counter_7a3f"-->
+##   <!--nexum-island end="Counter_7a3f"-->
 ##
 ## Hydration reads these, finds the root Element, and mounts the island
 ## without destroying the existing DOM.
@@ -25,8 +25,8 @@ type
   HydrationError* = object of CatchableError
 
 const
-  IslandStartPrefix = "helix-island start=\""
-  IslandEndPrefix = "helix-island end=\""
+  IslandStartPrefix = "nexum-island start=\""
+  IslandEndPrefix = "nexum-island end=\""
 
 # ---------------------------------------------------------------------------
 # Marker scanning
@@ -61,7 +61,7 @@ proc parseIslandStart(text: string): Option[IslandMarker] =
     none[IslandMarker]()
 
 proc scanIslands*(doc: Document): seq[IslandMarker] =
-  ## Walks all comment nodes in the document looking for Helix markers.
+  ## Walks all comment nodes in the document looking for Nexum markers.
   result = @[]
   var stack: seq[Node] = @[Node(doc)]
 

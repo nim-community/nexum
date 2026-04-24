@@ -1,9 +1,9 @@
-# Helix
+# Nexum
 
 > A compile-time reactive web framework for Nim.  
 > Zero virtual DOM. Full SSR. Partial hydration.
 
-Helix is a next-generation frontend framework that leverages Nim's macro system to do at compile time what other frameworks do at runtime. It generates fine-grained DOM updates from reactive signals, produces server-rendered HTML with island hydration markers, and ships minimal JavaScript to the browser.
+Nexum is a next-generation frontend framework that leverages Nim's macro system to do at compile time what other frameworks do at runtime. It generates fine-grained DOM updates from reactive signals, produces server-rendered HTML with island hydration markers, and ships minimal JavaScript to the browser.
 
 ## Philosophy
 
@@ -14,7 +14,7 @@ Helix is a next-generation frontend framework that leverages Nim's macro system 
 ## Quick Start (Vision)
 
 ```nim
-import helix
+import nexum
 
 # A reactive component
 {.island.}

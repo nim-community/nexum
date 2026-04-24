@@ -1,4 +1,4 @@
-import helix
+import nexum
 import std/[unittest, tables]
 
 suite "Router":
@@ -34,10 +34,10 @@ suite "Router":
     var loaderCalled = false
     r.addRoute("/data",
       proc(params: Table[string, string]): string =
-        "data:" & getRouteData(),
+      "data:" & getRouteData(),
       loader = proc(): string =
-        loaderCalled = true
-        "{\"count\":42}"
+      loaderCalled = true
+      "{\"count\":42}"
     )
 
     let (route, _) = r.match("/data")

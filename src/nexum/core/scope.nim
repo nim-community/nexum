@@ -1,4 +1,4 @@
-## Helix Scope — Lifecycle and cleanup management.
+## Nexum Scope — Lifecycle and cleanup management.
 
 import signals
 

@@ -1,5 +1,5 @@
 import unittest, strutils
-import helix/compiler/style
+import nexum/compiler/style
 
 suite "Scoped CSS":
   test "scopeCss basic":

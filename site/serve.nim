@@ -1,4 +1,4 @@
-## Helix Dev Server
+## Nexum Dev Server
 ##
 ## Serves dist/ with auto-rebuild, error overlay, and browser reload.
 ## Run: nim c -r site/serve.nim
@@ -17,7 +17,7 @@ type BuildState = object
   lastBuild: float
   buildOk: bool
   buildError: string
-  clients: seq[Future[void]]  # SSE clients waiting for reload
+  clients: seq[Future[void]] # SSE clients waiting for reload
 
 type BuildStateRef = ref BuildState
 var gState: BuildStateRef
@@ -58,7 +58,8 @@ proc collectWatchedFiles(): seq[string] =
     if file.endsWith(".nim"):
       result.add(file)
   for file in walkDirRec("site"):
-    if file.endsWith(".nim") and not file.endsWith("serve.nim") and not file.endsWith("build.nim") and not file.endsWith("dev.nim"):
+    if file.endsWith(".nim") and not file.endsWith("serve.nim") and not file.endsWith("build.nim") and
+        not file.endsWith("dev.nim"):
       result.add(file)
 
 proc getMtimes(files: seq[string]): seq[float] =
@@ -107,7 +108,7 @@ proc watchAndBuild() {.async.} =
 
 proc errorHtml(error: string): string =
   result = """<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><title>Build Error — Helix</title>
+<html lang="en"><head><meta charset="utf-8"><title>Build Error — Nexum</title>
 <style>
   *{box-sizing:border-box;margin:0}
   body{font-family:SF Mono,Monaco,Cascadia Code,monospace;background:#1a1a1a;color:#f4f1ea;padding:2rem;line-height:1.6}
@@ -118,7 +119,7 @@ proc errorHtml(error: string): string =
   .reload{color:#6b6560;margin-top:2rem;font-size:0.9rem}
 </style></head><body>
   <h1>Build Error</h1>
-  <div class="badge">Helix Dev Server</div>
+  <div class="badge">Nexum Dev Server</div>
   <pre>""" & error.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;") & """</pre>
   <div class="reload">Fix the error and save. The page will auto-reload.</div>
 </body></html>"""

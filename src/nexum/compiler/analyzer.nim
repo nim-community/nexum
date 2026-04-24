@@ -1,4 +1,4 @@
-## Helix Compiler — Analyzer: static/dynamic partitioning & dependency graph.
+## Nexum Compiler — Analyzer: static/dynamic partitioning & dependency graph.
 
 import parser
 

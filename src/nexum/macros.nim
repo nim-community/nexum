@@ -1,4 +1,4 @@
-## Helix Macros — @component and @island decorators.
+## Nexum Macros — @component and @island decorators.
 
 import std/macros
 
@@ -7,7 +7,7 @@ import std/macros
 # ---------------------------------------------------------------------------
 
 macro component*(p: untyped): untyped =
-  ## Marks a proc as a Helix component.
+  ## Marks a proc as a Nexum component.
   ## Wraps the body in a fresh Scope so that effects and cleanups
   ## are isolated per component instance.
   expectKind(p, nnkProcDef)
@@ -52,13 +52,13 @@ macro island*(p: untyped): untyped =
         newStmtList(
           newCall(ident"startHydration", ident"root"),
           newCall(ident(name))
-        ),
-        newTree(nnkFinally,
-          newStmtList(
-            newCall(ident"stopHydration")
-          )
-        )
       ),
+      newTree(nnkFinally,
+        newStmtList(
+          newCall(ident"stopHydration")
+        )
+      )
+    ),
       procType = nnkLambda
     )
     let regCall = newCall(ident"registerIsland", newLit(name), factory)

@@ -1,5 +1,5 @@
 version       = "0.1.0"
-author        = "Helix Contributors"
+author        = "Nexum Contributors"
 description   = "Compile-time reactive web framework for Nim with SSR & Islands"
 license       = "AGPL-3.0"
 srcDir        = "src"

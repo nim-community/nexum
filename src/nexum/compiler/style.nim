@@ -1,4 +1,4 @@
-## Helix Style — Compile-time scoped CSS
+## Nexum Style — Compile-time scoped CSS
 ##
 ## Usage:
 ##   const myStyle = @style """
@@ -98,7 +98,7 @@ proc scopeCss*(css, scopeClass: string): string =
 macro style*(css: static[string]): untyped =
   ## Scopes a CSS block and returns a StyleBlock.
   let h = hash(css) mod 0xFFFFFF
-  let scopeClass = "helix-" & toHex(h.int, 6)
+  let scopeClass = "nexum-" & toHex(h.int, 6)
   let scoped = scopeCss(css, scopeClass)
 
   let scopeLit = newLit(scopeClass)

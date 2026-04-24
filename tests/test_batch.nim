@@ -1,4 +1,4 @@
-import helix/core/signals
+import nexum/core/signals
 
 # Test batch defers updates
 var count = 0
@@ -7,7 +7,7 @@ createEffect(proc() =
   discard s()
   inc count
 )
-assert count == 1  # initial run
+assert count == 1 # initial run
 
 batch(proc() =
   s.set(1)

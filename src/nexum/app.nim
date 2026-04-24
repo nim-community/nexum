@@ -1,4 +1,4 @@
-## Helix App — Application bootstrap.
+## Nexum App — Application bootstrap.
 
 import router
 when defined(js):
@@ -7,11 +7,11 @@ when defined(js):
 
 type
   AppConfig* = object
-    rootId*: string = "app"         ## DOM root id for client mount
-    enableHydration*: bool = true   ## if true, scan for SSR markers
-    enableIslands*: bool = true     ## if true, only hydrate marked islands
-    port*: int = 3000               ## Server port
-    staticDir*: string = "dist"     ## Static files directory
+    rootId*: string = "app"       ## DOM root id for client mount
+    enableHydration*: bool = true ## if true, scan for SSR markers
+    enableIslands*: bool = true   ## if true, only hydrate marked islands
+    port*: int = 3000             ## Server port
+    staticDir*: string = "dist"   ## Static files directory
 
   App* = ref object
     config*: AppConfig
@@ -25,7 +25,7 @@ proc initApp*(config = AppConfig()): App =
 
 when defined(js):
   proc readHydratedData(): string =
-    let script = document.querySelector(cstring"#__helix_data")
+    let script = document.querySelector(cstring"#__nexum_data")
     if script != nil:
       result = $script.textContent
     else:
@@ -89,7 +89,7 @@ else:
 
     let mimeDb = newMimetypes()
 
-    echo "Helix server listening on http://localhost:" & $app.config.port
+    echo "Nexum server listening on http://localhost:" & $app.config.port
 
     while true:
       var client = newSocket()
@@ -115,7 +115,8 @@ else:
         let ext = splitFile(staticPath).ext
         let mime = mimeDb.getMimetype(ext)
         let content = readFile(staticPath)
-        response = "HTTP/1.1 200 OK\r\nContent-Type: " & mime & "\r\nContent-Length: " & $content.len & "\r\nConnection: close\r\n\r\n" & content
+        response = "HTTP/1.1 200 OK\r\nContent-Type: " & mime & "\r\nContent-Length: " & $content.len &
+            "\r\nConnection: close\r\n\r\n" & content
       else:
         let (route, params) = router.match(path)
         if route.loader != nil:
@@ -124,10 +125,11 @@ else:
           currentRouteData = ""
         var html = route.handler(params)
         if currentRouteData.len > 0:
-          html.add "<script id=\"__helix_data\" type=\"application/json\">"
+          html.add "<script id=\"__nexum_data\" type=\"application/json\">"
           html.add currentRouteData
           html.add "</script>"
-        response = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: " & $html.len & "\r\nConnection: close\r\n\r\n" & html
+        response = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: " & $html.len &
+            "\r\nConnection: close\r\n\r\n" & html
 
       client.send(response)
       client.close()

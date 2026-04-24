@@ -1,9 +1,9 @@
-# Design System: Helix
-**Project ID:** helix-nim-framework
+# Design System: Nexum
+**Project ID:** nexum-nim-framework
 
 ## 1. Visual Theme & Atmosphere
 
-Helix is a compile-time reactive web framework for Nim. Its visual language communicates **precision through warmth** — the cold rigor of compiler engineering (macro expansion, isomorphic codegen, zero-JS static pages) wrapped in an approachable, editorial aesthetic that feels like reading a well-typeset technical journal.
+Nexum is a compile-time reactive web framework for Nim. Its visual language communicates **precision through warmth** — the cold rigor of compiler engineering (macro expansion, isomorphic codegen, zero-JS static pages) wrapped in an approachable, editorial aesthetic that feels like reading a well-typeset technical journal.
 
 The atmosphere is **warm minimalism with scholarly authority**. Generous whitespace creates confidence. A warm off-white canvas feels like aged parchment rather than sterile paper. Deep earthy accents (burnt sienna, forest teal) ground the interface in organic materiality. High-contrast serif headlines create editorial gravitas, while clean sans-serif body text ensures technical readability.
 
@@ -136,7 +136,7 @@ The atmosphere is **warm minimalism with scholarly authority**. Generous whitesp
 
 ## 6. Depth & Elevation
 
-Helix communicates depth through **color and warmth**, not through aggressive shadows.
+Nexum communicates depth through **color and warmth**, not through aggressive shadows.
 
 | Level | Name | Treatment | Usage |
 |-------|------|-----------|-------|

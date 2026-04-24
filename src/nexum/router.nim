@@ -1,4 +1,4 @@
-## Helix Router — Isomorphic routing (client + server).
+## Nexum Router — Isomorphic routing (client + server).
 
 import std/[tables, strutils]
 
@@ -7,7 +7,7 @@ when defined(js):
   import runtime/dom
   type VNode* = Node
 else:
-  type VNode* = string  ## Placeholder for server-side rendered fragment
+  type VNode* = string ## Placeholder for server-side rendered fragment
 
 type
   RouteHandler* = proc(params: Table[string, string]): VNode {.closure.}
@@ -15,8 +15,8 @@ type
 
   Route* = object
     path*: string
-    segments*: seq[string]    ## path split by "/"
-    paramNames*: seq[string]  ## param names in order of appearance
+    segments*: seq[string]   ## path split by "/"
+    paramNames*: seq[string] ## param names in order of appearance
     handler*: RouteHandler
     loader*: RouteLoader
 
@@ -43,7 +43,7 @@ proc addRoute*(r: Router; path: string; handler: RouteHandler; loader: RouteLoad
       paramNames.add(segment[1 .. ^1])
   r.routes.add(Route(path: path, segments: segments, paramNames: paramNames, handler: handler, loader: loader))
 
-var currentRouteData*: string = ""  ## Set by app before calling handler
+var currentRouteData*: string = "" ## Set by app before calling handler
 
 proc getRouteData*(): string =
   ## Returns the JSON data loaded by the current route's loader.

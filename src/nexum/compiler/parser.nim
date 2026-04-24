@@ -1,24 +1,24 @@
-## Helix Compiler — Parser: buildHtml DSL → Intermediate Representation (IR)
+## Nexum Compiler — Parser: buildHtml DSL → Intermediate Representation (IR)
 
 import std/macros
 
 type
   ## The shape of a compiled template
   NodeKind* = enum
-    nkElement       ## <tag> with optional attrs, children
-    nkText          ## static or dynamic text
-    nkComponent     ## user-defined @component
-    nkIsland        ## {.island.} wrapped component
-    nkFragment      ## <>...</>  (multi-root, elided)
-    nkIf            ## if / elif / else
-    nkFor           ## for loop
-    nkCase          ## case / of
-    nkExpr          ## raw Nim expression node
+    nkElement   ## <tag> with optional attrs, children
+    nkText      ## static or dynamic text
+    nkComponent ## user-defined @component
+    nkIsland    ## {.island.} wrapped component
+    nkFragment  ## <>...</>  (multi-root, elided)
+    nkIf        ## if / elif / else
+    nkFor       ## for loop
+    nkCase      ## case / of
+    nkExpr      ## raw Nim expression node
 
   AttrValueKind* = enum
-    avStatic        ## string literal
-    avDynamic       ## Signal / expression
-    avEvent         ## onclick, oninput, etc.
+    avStatic  ## string literal
+    avDynamic ## Signal / expression
+    avEvent   ## onclick, oninput, etc.
 
   Attr* = object
     name*: string
@@ -37,11 +37,11 @@ type
       isMath*: bool
     of nkText:
       textStatic*: string
-      textExpr*: NimNode   ## if nil, text is static
+      textExpr*: NimNode  ## if nil, text is static
     of nkComponent, nkIsland:
       compType*: string
-      compProps*: NimNode  ## object constructor AST
-      compKey*: NimNode    ## optional key expr
+      compProps*: NimNode ## object constructor AST
+      compKey*: NimNode   ## optional key expr
     of nkFragment:
       fragmentChildren*: seq[IrNode]
     of nkIf:
@@ -58,7 +58,7 @@ type
       expr*: NimNode
 
 proc parseError(msg: string; n: NimNode) {.noreturn.} =
-  error("Helix template error: " & msg, n)
+  error("Nexum template error: " & msg, n)
 
 # ---------------------------------------------------------------------------
 # Helpers

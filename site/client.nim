@@ -1,9 +1,9 @@
-## Helix Official Site — Client Bundle
+## Nexum Official Site — Client Bundle
 ##
 ## Compiles to JS and hydrates interactive islands.
 
-import helix
-import helix/compiler/buildhtml
+import nexum
+import nexum/compiler/buildhtml
 
 when defined(js):
   # --- Counter demo ---
@@ -11,7 +11,7 @@ when defined(js):
 
   proc CounterDemo(): auto =
     buildHtml:
-      `div`(class="demo-row"):
+      `div`(class = "demo-row"):
         h4: "Signal Counter"
         button(onclick = proc(ev: Event) = count.set(count() + 1)): "Clicked "
         span: $count()
@@ -22,14 +22,14 @@ when defined(js):
 
   proc BindingDemo(): auto =
     buildHtml:
-      `div`(class="demo-row"):
+      `div`(class = "demo-row"):
         h4: "Data Binding"
-        `div`(class="demo-input-row"):
+        `div`(class = "demo-input-row"):
           label: "Your name:"
-          input(type="text", oninput = proc(ev: Event) = name.set($ev.target.value))
+          input(type = "text", oninput = proc(ev: Event) = name.set($ev.target.value))
         p:
           "Hello, " & $name() & "!"
-        p(class="demo-meta"):
+        p(class = "demo-meta"):
           "Characters: " & $name().len
 
   # --- Conditional rendering demo ---
@@ -40,7 +40,7 @@ when defined(js):
     statusSpan.className = cstring"demo-highlight"
 
     let root = buildHtml:
-      `div`(class="demo-row"):
+      `div`(class = "demo-row"):
         h4: "Conditional Rendering"
         button(onclick = proc(ev: Event) = show.set(not show())): "Toggle"
         span: " Status: "

@@ -1,5 +1,5 @@
-import helix
-import helix/compiler/buildhtml
+import nexum
+import nexum/compiler/buildhtml
 import std/[unittest, json, strutils]
 
 suite "SSR Renderer":
@@ -15,7 +15,7 @@ suite "SSR Renderer":
     ctx.writeIslandStart("Counter_1", %*{"initial": 0})
     ctx.write("<button>0</button>")
     ctx.writeIslandEnd("Counter_1")
-    check ctx.buf.contains("helix-island")
+    check ctx.buf.contains("nexum-island")
     check ctx.buf.contains("Counter_1")
 
   test "buildHtml basic element":
@@ -27,7 +27,7 @@ suite "SSR Renderer":
   test "buildHtml nested elements":
     proc Card(): auto =
       buildHtml:
-        `div`(class="card"):
+        `div`(class = "card"):
           h2: "Title"
           p: "Body"
     let html = Card()
@@ -36,11 +36,11 @@ suite "SSR Renderer":
     check html.contains("<p>Body</p>")
 
   test "buildHtml dynamic text":
-    let name = "Helix"
+    let name = "Nexum"
     proc Greet(): auto =
       buildHtml:
         span: "Hello, " & name
-    check Greet() == "<span>Hello, Helix</span>"
+    check Greet() == "<span>Hello, Nexum</span>"
 
   test "buildHtml if statement":
     let show = true
@@ -95,5 +95,5 @@ suite "SSR Renderer":
       buildHtml:
         island MyIsland()
     let html = Page()
-    check html.contains("helix-island")
+    check html.contains("nexum-island")
     check html.contains("MyIsland")

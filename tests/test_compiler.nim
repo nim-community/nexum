@@ -1,10 +1,10 @@
-## Minimal compile-time test for the Helix compiler layer.
+## Minimal compile-time test for the Nexum compiler layer.
 ##
 ## Exercises parser, analyzer, and both codegen paths inside a macro
 ## so that generated JS-only code never reaches the C backend.
 
 import std/[macros, json]
-import helix/compiler/[parser, analyzer, codegen_client, codegen_server]
+import nexum/compiler/[parser, analyzer, codegen_client, codegen_server]
 
 macro testCompiler() =
   # -----------------------------------------------------------------------

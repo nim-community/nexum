@@ -1,4 +1,4 @@
-import helix
+import nexum
 import std/unittest
 
 suite "Signals":
@@ -35,7 +35,7 @@ suite "Signals":
     )
     check called == 1
     s.set(2)
-    check called == 1  # effect should not rerun
+    check called == 1 # effect should not rerun
 
   test "batch queues updates":
     let a = signal(1)
@@ -51,7 +51,7 @@ suite "Signals":
       a.set(10)
       b.set(20)
     )
-    check called == 2  # should only run once after batch
+    check called == 2 # should only run once after batch
 
   test "onCleanup registers cleanup":
     var cleaned = false

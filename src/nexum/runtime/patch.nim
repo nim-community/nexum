@@ -1,4 +1,4 @@
-## Helix Runtime — Patch / Mount: attaching components to DOM nodes.
+## Nexum Runtime — Patch / Mount: attaching components to DOM nodes.
 ##
 ## Unlike VDOM diff, this is a one-time structural walk to bind
 ## compiled component shapes to real DOM.

@@ -1,37 +1,37 @@
-## Helix — Public API
+## Nexum — Public API
 ##
-## Import this module to access the full Helix framework.
+## Import this module to access the full Nexum framework.
 
 import std/json
 export json
 
 # Core (available on both targets)
-import helix/core/[signals, scope, context]
+import nexum/core/[signals, scope, context]
 export signals, scope, context
 
 # App bootstrap (available on both targets)
-import helix/app
+import nexum/app
 export app
 
 when defined(js):
   # Client runtime
-  import helix/runtime/[dom, hydrate, patch]
+  import nexum/runtime/[dom, hydrate, patch]
   export dom, hydrate, patch
 else:
   # Server runtime
-  import helix/server/[renderer, stream]
+  import nexum/server/[renderer, stream]
   export renderer, stream
 
 # Router (isomorphic)
-import helix/router
+import nexum/router
 export router
 
 # Component macros
-import helix/macros
+import nexum/macros
 export macros
 
 # Scoped CSS
-import helix/compiler/style
+import nexum/compiler/style
 export style
 
 # Compiler layer is used implicitly via buildHtml; not re-exported here.

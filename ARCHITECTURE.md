@@ -1,4 +1,4 @@
-# Helix Architecture
+# Nexum Architecture
 
 > A compile-time reactive web framework for Nim.  
 > Zero virtual DOM. Full SSR. Partial hydration.
@@ -8,7 +8,7 @@
 ## 1. Core Philosophy
 
 Karax and most legacy frameworks rely on **Virtual DOM + diff**.  
-Helix abandons this entirely in favor of **compile-time reactivity**:
+Nexum abandons this entirely in favor of **compile-time reactivity**:
 
 - At compile time, Nim macros analyze your component templates.
 - They extract **static** vs **dynamic** parts.
@@ -72,7 +72,7 @@ Effects are **auto-tracked** by the compiler. You write normal Nim code; the mac
 
 ### 3.2 Compile-Time / Run-Time Split
 
-Helix does not ship a template compiler to the browser.  
+Nexum does not ship a template compiler to the browser.  
 `buildHtml` is a macro that runs at **Nim compile time** and produces two artifacts:
 
 1. **Client artifact** (`nim js`):
@@ -87,7 +87,7 @@ Helix does not ship a template compiler to the browser.
 
 ### 3.3 Islands Architecture
 
-By default, Helix SSR produces **static HTML with zero JavaScript**.  
+By default, Nexum SSR produces **static HTML with zero JavaScript**.  
 You opt components into interactivity with the `{.island.}` pragma:
 
 ```nim
@@ -102,29 +102,29 @@ component Counter:
 On the server, this renders the initial HTML and inserts marker comments:
 
 ```html
-<!--helix-island start="Counter_7a3f" props='{"initial":0}'-->
+<!--nexum-island start="Counter_7a3f" props='{"initial":0}'-->
 <button>0</button>
-<!--helix-island end="Counter_7a3f"-->
+<!--nexum-island end="Counter_7a3f"-->
 ```
 
 On the client, the hydration engine scans for these markers, mounts only the island components, and wires their signals. The rest of the page remains inert static HTML.
 
 ### 3.4 Hydration without VDOM
 
-Because Helix knows the exact DOM structure at compile time, hydration is **targeted**:
+Because Nexum knows the exact DOM structure at compile time, hydration is **targeted**:
 
 1. Parse island markers from SSR output.
 2. `document.querySelector` the root element directly.
 3. Walk the expected node shape once, establishing `Signal → DOM node/attr` bindings.
 4. Done. No diff. No second render pass.
 
-If hydration mismatches (server/client output differ), Helix falls back to **client-side island remount** (clearing the island root and rebuilding just that subtree).
+If hydration mismatches (server/client output differ), Nexum falls back to **client-side island remount** (clearing the island root and rebuilding just that subtree).
 
 ---
 
 ## 4. Why This Beats Karax (and most VDOM)
 
-| Dimension | Karax | Helix |
+| Dimension | Karax | Nexum |
 |-----------|-------|-------|
 | **Reactive Granularity** | Event → full redraw + VDOM diff | Signal → direct DOM mutation |
 | **List Updates** | Prefix/suffix naive diff | Keyed diff generated at compile time, or fine-grained signal-per-row |
@@ -138,12 +138,12 @@ If hydration mismatches (server/client output differ), Helix falls back to **cli
 ## 5. File Organization
 
 ```
-helix/
-  helix.nimble
+nexum/
+  nexum.nimble
   ARCHITECTURE.md
   src/
-    helix.nim               # Public API exports
-    helix/
+    nexum.nim               # Public API exports
+    nexum/
       core/
         signals.nim         # Signal[T], Effect, Memo, batch()
         scope.nim           # Effect cleanup, onCleanup, onMount

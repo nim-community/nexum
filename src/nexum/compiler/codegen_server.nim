@@ -1,4 +1,4 @@
-## Helix Compiler — Server Codegen: IR → fast string builder.
+## Nexum Compiler — Server Codegen: IR → fast string builder.
 ##
 ## Generates code like:
 ##   ctx.write("<div class=\"x\">")

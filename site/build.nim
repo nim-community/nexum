@@ -1,4 +1,4 @@
-## Helix Site Builder
+## Nexum Site Builder
 ##
 ## Compiles the official site to static HTML + JS.
 ## Run: nim c -r site/build.nim

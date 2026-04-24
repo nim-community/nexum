@@ -1,4 +1,4 @@
-## Helix Compiler — buildHtml macro
+## Nexum Compiler — buildHtml macro
 ##
 ## The user-facing macro that turns a DSL block into either DOM code (JS)
 ## or HTML string code (native).
@@ -30,9 +30,9 @@ macro buildHtml*(body: untyped): untyped =
       newTree(nnkElifBranch,
         newCall("defined", newIdentNode("js")),
         clientCode
-      ),
-      newTree(nnkElse,
-        serverWrapped
-      )
+    ),
+    newTree(nnkElse,
+      serverWrapped
     )
+  )
   )

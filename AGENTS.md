@@ -1,4 +1,4 @@
-# Helix — Agent Guide
+# Nexum — Agent Guide
 
 > A compile-time reactive web framework for Nim.  
 > Zero virtual DOM. Full SSR. Partial hydration.
@@ -7,7 +7,7 @@
 
 ## Project Overview
 
-Helix is an experimental frontend framework that uses Nim's macro system to perform at compile time what other frameworks do at runtime. It generates fine-grained DOM updates from reactive signals, produces server-rendered HTML with island hydration markers, and ships minimal JavaScript to the browser.
+Nexum is an experimental frontend framework that uses Nim's macro system to perform at compile time what other frameworks do at runtime. It generates fine-grained DOM updates from reactive signals, produces server-rendered HTML with island hydration markers, and ships minimal JavaScript to the browser.
 
 **Status:** Experimental / Design phase. Core signal runtime and the `buildHtml` macro compiler are in place. Full hydration engine is under active design.
 
@@ -29,14 +29,14 @@ Helix is an experimental frontend framework that uses Nim's macro system to perf
 ## Directory Structure
 
 ```
-helix/
-  helix.nimble              # Package manifest
+nexum/
+  nexum.nimble              # Package manifest
   README.md                 # Human-facing quick start and philosophy
   ARCHITECTURE.md           # Full design document with roadmap
   AGENTS.md                 # This file
   src/
-    helix.nim               # Public API entry point — import this
-    helix/
+    nexum.nim               # Public API entry point — import this
+    nexum/
       core/                 # Universal runtime (both backends)
         signals.nim         # Signal[T], Effect, Memo, batch(), untrack()
         scope.nim           # Scope, onCleanup, onMount, runInScope()
@@ -98,7 +98,7 @@ nim js --path:"src" -o:dist/client.js site/client.nim
 nim c --path:"src" site/build.nim
 ```
 
-Test files use either `std/unittest` or plain `assert`. The `tests/nim.cfg` adds `--path:"../src"` so tests can `import helix` directly.
+Test files use either `std/unittest` or plain `assert`. The `tests/nim.cfg` adds `--path:"../src"` so tests can `import nexum` directly.
 
 ---
 
@@ -173,9 +173,9 @@ DSL rules:
 - `@island` macro marks a component for client hydration. On JS, it registers a hydration factory in `islandRegistry`.
 - Islands emit SSR marker comments:
   ```html
-  <!--helix-island start="Counter_7a3f" props='{...}'-->
+  <!--nexum-island start="Counter_7a3f" props='{...}'-->
   <button>0</button>
-  <!--helix-island end="Counter_7a3f"-->
+  <!--nexum-island end="Counter_7a3f"-->
   ```
 
 ### Router
@@ -213,8 +213,8 @@ Tests live in `tests/` and are compiled as standalone binaries. When adding new 
 
 ## How to Navigate the Code
 
-1. **Start with `src/helix.nim`** — it exports the public API and shows the module split.
-2. **Core reactivity:** `src/helix/core/signals.nim` is the foundation everything else builds on.
+1. **Start with `src/nexum.nim`** — it exports the public API and shows the module split.
+2. **Core reactivity:** `src/nexum/core/signals.nim` is the foundation everything else builds on.
 3. **Compiler pipeline:** `parser.nim` → `analyzer.nim` → `codegen_client.nim` / `codegen_server.nim` → `buildhtml.nim`.
 4. **Client runtime:** `runtime/dom.nim` for DOM wrappers, `hydrate.nim` for island scanning, `patch.nim` for mount/unmount.
 5. **Server runtime:** `server/renderer.nim` for HTML generation, `server/stream.nim` for chunked responses.
@@ -227,4 +227,4 @@ Tests live in `tests/` and are compiled as standalone binaries. When adding new 
 - Do not import `runtime/dom.nim` on the C backend; it will raise a compile-time error.
 - `buildHtml` must be used inside a proc because it generates a statement list expression.
 - Signal equality checks use `==`; if `T` does not define `==`, the signal will always trigger updates.
-- The `@component` macro transforms the proc AST; if you need to inspect the original body, look at the macro in `src/helix/macros.nim`.
+- The `@component` macro transforms the proc AST; if you need to inspect the original body, look at the macro in `src/nexum/macros.nim`.

@@ -1,4 +1,4 @@
-## Helix Signals — Fine-grained reactive core.
+## Nexum Signals — Fine-grained reactive core.
 ## Inspired by Solid.js, adapted for Nim's type system.
 
 {.experimental: "callOperator".}
@@ -12,7 +12,7 @@ type
   Effect* = ref object
     fn*: EffectFn
     cleanups*: seq[CleanupFn]
-    sources*: HashSet[SourceBase]  ## back-references for unsubscribing
+    sources*: HashSet[SourceBase] ## back-references for unsubscribing
     disposed*: bool
 
   SourceBase* = ref object of RootObj
@@ -30,7 +30,7 @@ type
     tracker*: Effect
 
   ReadOptions* = enum
-    track  ## default: register this read as a dependency
+    track   ## default: register this read as a dependency
     untrack ## read without subscribing
 
 var

@@ -1,13 +1,13 @@
-## Helix Context — Component instance context and dependency injection.
+## Nexum Context — Component instance context and dependency injection.
 
 import std/[tables, json]
 
 type
   Context* = ref object
     parent*: Context
-    store*: Table[string, pointer]  ## type-erased for flexibility
-    keys*: Table[string, string]    ## metadata keys (e.g., island id)
-    jsonStore*: Table[string, JsonNode]  ## JSON-serializable props for SSR
+    store*: Table[string, pointer]      ## type-erased for flexibility
+    keys*: Table[string, string]        ## metadata keys (e.g., island id)
+    jsonStore*: Table[string, JsonNode] ## JSON-serializable props for SSR
 
 proc newContext*(parent: Context = nil): Context =
   Context(parent: parent)

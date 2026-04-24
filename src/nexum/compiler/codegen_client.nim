@@ -1,4 +1,4 @@
-## Helix Compiler — Client Codegen: IR → DOM + Signal effects.
+## Nexum Compiler — Client Codegen: IR → DOM + Signal effects.
 ##
 ## Generates code like:
 ##   let n0 = document.createElement("div")
@@ -222,10 +222,10 @@ proc genNode(ir: IrNode; state: var ClientGenState; parentVar: string;
               newCall(
                 newDotExpr(newDotExpr(ident(oldNodeVar), ident"parentNode"), ident"removeChild"),
                 ident(oldNodeVar)
-              )
-            )
-          ))
         )
+      )
+        ))
+      )
       ))
       effectBody.add(newCall(newDotExpr(ident(prevNodesVar), ident"setLen"), newLit(0)))
 

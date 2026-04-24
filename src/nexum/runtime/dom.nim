@@ -1,9 +1,9 @@
-## Helix Runtime — Thin DOM abstraction for JS target.
+## Nexum Runtime — Thin DOM abstraction for JS target.
 
 when not defined(js):
   {.error: "dom.nim targets JS only".}
 
-# Re-export or wrap minimal browser APIs so Helix does not depend on karax/kdom.
+# Re-export or wrap minimal browser APIs so Nexum does not depend on karax/kdom.
 
 type
   Node* = ref object of RootObj
@@ -24,9 +24,9 @@ const
 # Hydration mode: intercept DOM creation to reuse existing SSR nodes
 # ---------------------------------------------------------------------------
 
-var helixHydrating*: bool = false
-var helixHydrateQueue*: seq[Node] = @[]
-var helixHydrateIndex*: int = 0
+var nexumHydrating*: bool = false
+var nexumHydrateQueue*: seq[Node] = @[]
+var nexumHydrateIndex*: int = 0
 
 proc childNodes*(n: Node): seq[Node] {.importjs: "#.childNodes".}
 proc nodeType*(n: Node): int {.importjs: "#.nodeType".}
@@ -37,22 +37,22 @@ proc startHydration*(root: Element) =
   ## Collects all nodes in DFS pre-order so that `createElement`/
   ## `createTextNode` calls can return existing SSR nodes instead of
   ## creating fresh ones.
-  helixHydrating = true
-  helixHydrateQueue = @[]
-  helixHydrateIndex = 0
+  nexumHydrating = true
+  nexumHydrateQueue = @[]
+  nexumHydrateIndex = 0
   var stack = @[Node(root)]
   while stack.len > 0:
     let n = stack.pop()
-    helixHydrateQueue.add(n)
+    nexumHydrateQueue.add(n)
     let children = childNodes(n)
     for i in countdown(children.high, 0):
       stack.add(children[i])
 
 proc stopHydration*() =
   ## Exit hydration mode and clean up.
-  helixHydrating = false
-  helixHydrateQueue = @[]
-  helixHydrateIndex = 0
+  nexumHydrating = false
+  nexumHydrateQueue = @[]
+  nexumHydrateIndex = 0
 
 # ---------------------------------------------------------------------------
 # DOM creation wrappers that consume the hydration queue when active
@@ -60,10 +60,10 @@ proc stopHydration*() =
 
 proc jsCreateElement(d: Document; tag: cstring): Element {.importjs: "#.createElement(#)".}
 proc createElement*(d: Document; tag: cstring): Element =
-  if helixHydrating:
-    while helixHydrateIndex < helixHydrateQueue.len:
-      let n = helixHydrateQueue[helixHydrateIndex]
-      inc helixHydrateIndex
+  if nexumHydrating:
+    while nexumHydrateIndex < nexumHydrateQueue.len:
+      let n = nexumHydrateQueue[nexumHydrateIndex]
+      inc nexumHydrateIndex
       if n.nodeType == NodeElement:
         return cast[Element](n)
   jsCreateElement(d, tag)
@@ -72,10 +72,10 @@ proc createElementNS*(d: Document; ns, tag: cstring): Element {.importjs: "#.cre
 
 proc jsCreateTextNode(d: Document; text: cstring): Node {.importjs: "#.createTextNode(#)".}
 proc createTextNode*(d: Document; text: cstring): Node =
-  if helixHydrating:
-    while helixHydrateIndex < helixHydrateQueue.len:
-      let n = helixHydrateQueue[helixHydrateIndex]
-      inc helixHydrateIndex
+  if nexumHydrating:
+    while nexumHydrateIndex < nexumHydrateQueue.len:
+      let n = nexumHydrateQueue[nexumHydrateIndex]
+      inc nexumHydrateIndex
       if n.nodeType == NodeText:
         return n
   jsCreateTextNode(d, text)
@@ -90,7 +90,7 @@ proc createDocumentFragment*(d: Document): Node {.importjs: "#.createDocumentFra
 proc jsAppendChild(parent, child: Node) {.importjs: "#.appendChild(#)".}
 
 proc appendChild*(parent, child: Node) =
-  if helixHydrating:
+  if nexumHydrating:
     # Skip comment anchors (if/for/case markers not present in SSR)
     if child.nodeType == NodeComment:
       return
@@ -121,8 +121,10 @@ proc `textContent=`*(n: Node; v: cstring) {.importjs: "#.textContent = #".}
 proc innerHTML*(e: Element): cstring {.importjs: "#.innerHTML".}
 proc `innerHTML=`*(e: Element; v: cstring) {.importjs: "#.innerHTML = #".}
 
-proc addEventListener*(e: Element|Window|Document; ev: cstring; handler: proc(ev: Event); capture = false) {.importjs: "#.addEventListener(#, #, #)".}
-proc removeEventListener*(e: Element|Window|Document; ev: cstring; handler: proc(ev: Event)) {.importjs: "#.removeEventListener(#, #)".}
+proc addEventListener*(e: Element|Window|Document; ev: cstring; handler: proc(ev: Event);
+    capture = false) {.importjs: "#.addEventListener(#, #, #)".}
+proc removeEventListener*(e: Element|Window|Document; ev: cstring; handler: proc(
+    ev: Event)) {.importjs: "#.removeEventListener(#, #)".}
 
 proc querySelector*(d: Document; sel: cstring): Element {.importjs: "#.querySelector(#)".}
 proc querySelectorAll*(d: Document; sel: cstring): seq[Element] {.importjs: "#.querySelectorAll(#)".}
