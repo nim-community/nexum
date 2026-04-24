@@ -30,4 +30,8 @@ export router
 import helix/macros
 export macros
 
+# Scoped CSS
+import helix/compiler/style
+export style
+
 # Compiler layer is used implicitly via buildHtml; not re-exported here.
