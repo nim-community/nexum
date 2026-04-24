@@ -26,17 +26,17 @@ proc HelixLogo(): auto =
     svg(viewBox="0 0 200 320", xmlns="http://www.w3.org/2000/svg", aria-hidden="true", class="helix-logo"):
       defs:
         linearGradient(id="hgrad", x1="0%", y1="0%", x2="100%", y2="100%"):
-          stop(offset="0%", style="stop-color:#c25e00;stop-opacity:1")
-          stop(offset="100%", style="stop-color:#0d5c56;stop-opacity:1")
+          stop(offset="0%", style="stop-color:#c73e1d;stop-opacity:1")
+          stop(offset="100%", style="stop-color:#5d2e8c;stop-opacity:1")
       g(fill="none", stroke="url(#hgrad)", stroke-width="2.5", stroke-linecap="round"):
         path(d="M100 20 Q140 60 100 100 Q60 140 100 180 Q140 220 100 260 Q60 300 100 300")
         path(d="M100 20 Q60 60 100 100 Q140 140 100 180 Q60 220 100 260 Q140 300 100 300")
-      g(fill="#c25e00"):
+      g(fill="#c73e1d"):
         circle(cx="100", cy="20", r="5")
         circle(cx="100", cy="100", r="5")
         circle(cx="100", cy="180", r="5")
         circle(cx="100", cy="260", r="5")
-      g(fill="#0d5c56"):
+      g(fill="#5d2e8c"):
         circle(cx="72", cy="60", r="5")
         circle(cx="128", cy="60", r="5")
         circle(cx="72", cy="140", r="5")
@@ -47,8 +47,10 @@ proc HelixLogo(): auto =
 proc HeroSection(): auto =
   buildHtml:
     header(class="hero"):
-      HelixLogo()
+      `div`(class="hero-pretitle"): "NIM · COMPILE-TIME · REACTIVE"
       h1: "Helix"
+      `div`(class="hero-rule"):
+        span: "◆"
       p: "A compile-time reactive web framework for Nim."
       span(class="badge"): "Experimental · Design Phase"
       `div`(class="hero-cta"):
@@ -167,11 +169,22 @@ proc ArchitectureSection(): auto =
     section(class="container"):
       h2: "Architecture"
       p: "Helix is structured in three layers that mirror the journey from Nim source to running UI."
-      `div`(class="code-block"):
-        pre:
-          span(class="c"): "## App Layer        — @component, @page, buildHtml, Signal\n"
-          span(class="c"): "## Compiler Layer   — Parser → Analyzer → Codegen (Client / Server)\n"
-          span(class="c"): "## Runtime Layer    — Signals | DOM Runtime | SSR Renderer | Hydrator\n"
+      `div`(class="layer-stack"):
+        `div`(class="layer layer-app"):
+          `div`(class="layer-num"): "1"
+          `div`(class="layer-body"):
+            h4: "App Layer"
+            p: "@component · @page · buildHtml · Signal"
+        `div`(class="layer layer-compiler"):
+          `div`(class="layer-num"): "2"
+          `div`(class="layer-body"):
+            h4: "Compiler Layer"
+            p: "Parser → Analyzer → Codegen (Client / Server)"
+        `div`(class="layer layer-runtime"):
+          `div`(class="layer-num"): "3"
+          `div`(class="layer-body"):
+            h4: "Runtime Layer"
+            p: "Signals · DOM Runtime · SSR Renderer · Hydrator"
       p:
         "The parser transforms the "
         code: "buildHtml"
@@ -288,7 +301,7 @@ proc indexPage*(): auto =
         title: "Helix — Compile-time Reactive Web Framework for Nim"
         meta(name="description", content="Helix generates fine-grained DOM updates at compile time. No virtual DOM. Isomorphic by default.")
         link(rel="preconnect", href="https://fonts.bunny.net")
-        link(rel="stylesheet", href="https://fonts.bunny.net/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+3:wght@400;600&display=swap")
+        link(rel="stylesheet", href="https://fonts.bunny.net/css2?family=Shrikhand&family=Source+Sans+3:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap")
         link(rel="stylesheet", href="style.css")
       body:
         nav(class="main-nav"):
