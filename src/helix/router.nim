@@ -11,12 +11,14 @@ else:
 
 type
   RouteHandler* = proc(params: Table[string, string]): VNode {.closure.}
+  RouteLoader* = proc(): string {.closure.}
 
   Route* = object
     path*: string
     segments*: seq[string]    ## path split by "/"
     paramNames*: seq[string]  ## param names in order of appearance
     handler*: RouteHandler
+    loader*: RouteLoader
 
   Router* = ref object
     routes*: seq[Route]
@@ -31,7 +33,7 @@ proc defaultNotFound(params: Table[string, string]): VNode =
 proc newRouter*(): Router =
   Router(routes: @[], notFound: defaultNotFound)
 
-proc addRoute*(r: Router; path: string; handler: RouteHandler) =
+proc addRoute*(r: Router; path: string; handler: RouteHandler; loader: RouteLoader = nil) =
   ## Register a route. Path segments starting with `:` are captured as parameters.
   var segments: seq[string]
   var paramNames: seq[string]
@@ -39,10 +41,17 @@ proc addRoute*(r: Router; path: string; handler: RouteHandler) =
     segments.add(segment)
     if segment.len > 0 and segment[0] == ':':
       paramNames.add(segment[1 .. ^1])
-  r.routes.add(Route(path: path, segments: segments, paramNames: paramNames, handler: handler))
+  r.routes.add(Route(path: path, segments: segments, paramNames: paramNames, handler: handler, loader: loader))
 
-proc match*(r: Router; url: string): (RouteHandler, Table[string, string]) =
-  ## Match a URL against registered routes. Returns the handler and captured params.
+var currentRouteData*: string = ""  ## Set by app before calling handler
+
+proc getRouteData*(): string =
+  ## Returns the JSON data loaded by the current route's loader.
+  ## Empty string if no loader ran.
+  currentRouteData
+
+proc match*(r: Router; url: string): (Route, Table[string, string]) =
+  ## Match a URL against registered routes. Returns the matched route and captured params.
   let urlSegments = url.split('/')
   for route in r.routes:
     if route.segments.len != urlSegments.len:
@@ -60,8 +69,8 @@ proc match*(r: Router; url: string): (RouteHandler, Table[string, string]) =
         matched = false
         break
     if matched:
-      return (route.handler, params)
-  return (r.notFound, initTable[string, string]())
+      return (route, params)
+  return (Route(handler: r.notFound), initTable[string, string]())
 
 # Client-side navigation
 when defined(js):

@@ -171,8 +171,8 @@ helix/
 
 ## 6. Roadmap
 
-1. **Phase 0**: Signal runtime + `buildHtml` client codegen (no SSR)
-2. **Phase 1**: Server codegen + `renderToString`
-3. **Phase 2**: Hydration markers + island hydration
-4. **Phase 3**: Streaming SSR + async data fetching (`load()`)
+1. **Phase 0**: Signal runtime + `buildHtml` client codegen (no SSR) ✅
+2. **Phase 1**: Server codegen + `renderToString` ✅
+3. **Phase 2**: Hydration markers + island hydration ✅
+4. **Phase 3**: Route-level data loading (`load()`) ✅ — Streaming SSR (async chunked) pending
 5. **Phase 4**: DevTools / HMR / error overlay

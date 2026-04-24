@@ -2,6 +2,7 @@
 
 import router
 when defined(js):
+  import std/json
   import runtime/[dom, hydrate]
 
 type
@@ -23,6 +24,13 @@ proc initApp*(config = AppConfig()): App =
 # ---------------------------------------------------------------------------
 
 when defined(js):
+  proc readHydratedData(): string =
+    let script = document.querySelector(cstring"#__helix_data")
+    if script != nil:
+      result = $script.textContent
+    else:
+      result = ""
+
   proc startClient*(app: App; renderFn: proc(): Node) =
     ## Client entry point without routing.
     let root = document.querySelector(cstring("#" & app.config.rootId))
@@ -41,9 +49,13 @@ when defined(js):
       raise newException(ValueError, "Root element #" & app.config.rootId & " not found")
 
     proc renderRoute(url: string) =
-      let (handler, params) = router.match(url)
+      let (route, params) = router.match(url)
+      if route.loader != nil:
+        currentRouteData = route.loader()
+      else:
+        currentRouteData = ""
       root.innerHTML = ""
-      root.appendChild(handler(params))
+      root.appendChild(route.handler(params))
 
     onNavigate = proc(url: string) =
       renderRoute(url)
@@ -51,7 +63,11 @@ when defined(js):
     setupPopstateListener()
 
     if app.config.enableHydration:
+      currentRouteData = readHydratedData()
       hydrateDocument()
+      let (route, params) = router.match($locationPathname)
+      root.innerHTML = ""
+      root.appendChild(route.handler(params))
     else:
       renderRoute($locationPathname)
 
@@ -101,8 +117,16 @@ else:
         let content = readFile(staticPath)
         response = "HTTP/1.1 200 OK\r\nContent-Type: " & mime & "\r\nContent-Length: " & $content.len & "\r\nConnection: close\r\n\r\n" & content
       else:
-        let (routeHandler, params) = router.match(path)
-        let html = routeHandler(params)
+        let (route, params) = router.match(path)
+        if route.loader != nil:
+          currentRouteData = route.loader()
+        else:
+          currentRouteData = ""
+        var html = route.handler(params)
+        if currentRouteData.len > 0:
+          html.add "<script id=\"__helix_data\" type=\"application/json\">"
+          html.add currentRouteData
+          html.add "</script>"
         response = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: " & $html.len & "\r\nConnection: close\r\n\r\n" & html
 
       client.send(response)
