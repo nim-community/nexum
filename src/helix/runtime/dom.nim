@@ -15,13 +15,97 @@ type
 var document* {.importjs, nodecl.}: Document
 var window* {.importjs, nodecl.}: Window
 
-proc createElement*(d: Document; tag: cstring): Element {.importjs: "#.createElement(#)".}
+const
+  NodeElement* = 1
+  NodeText* = 3
+  NodeComment* = 8
+
+# ---------------------------------------------------------------------------
+# Hydration mode: intercept DOM creation to reuse existing SSR nodes
+# ---------------------------------------------------------------------------
+
+var helixHydrating*: bool = false
+var helixHydrateQueue*: seq[Node] = @[]
+var helixHydrateIndex*: int = 0
+
+proc childNodes*(n: Node): seq[Node] {.importjs: "#.childNodes".}
+proc nodeType*(n: Node): int {.importjs: "#.nodeType".}
+proc parentNode*(n: Node): Node {.importjs: "#.parentNode".}
+
+proc startHydration*(root: Element) =
+  ## Enter hydration mode for an island root.
+  ## Collects all nodes in DFS pre-order so that `createElement`/
+  ## `createTextNode` calls can return existing SSR nodes instead of
+  ## creating fresh ones.
+  helixHydrating = true
+  helixHydrateQueue = @[]
+  helixHydrateIndex = 0
+  var stack = @[Node(root)]
+  while stack.len > 0:
+    let n = stack.pop()
+    helixHydrateQueue.add(n)
+    let children = childNodes(n)
+    for i in countdown(children.high, 0):
+      stack.add(children[i])
+
+proc stopHydration*() =
+  ## Exit hydration mode and clean up.
+  helixHydrating = false
+  helixHydrateQueue = @[]
+  helixHydrateIndex = 0
+
+# ---------------------------------------------------------------------------
+# DOM creation wrappers that consume the hydration queue when active
+# ---------------------------------------------------------------------------
+
+proc jsCreateElement(d: Document; tag: cstring): Element {.importjs: "#.createElement(#)".}
+proc createElement*(d: Document; tag: cstring): Element =
+  if helixHydrating:
+    while helixHydrateIndex < helixHydrateQueue.len:
+      let n = helixHydrateQueue[helixHydrateIndex]
+      inc helixHydrateIndex
+      if n.nodeType == NodeElement:
+        return cast[Element](n)
+  jsCreateElement(d, tag)
+
 proc createElementNS*(d: Document; ns, tag: cstring): Element {.importjs: "#.createElementNS(#, #)".}
-proc createTextNode*(d: Document; text: cstring): Node {.importjs: "#.createTextNode(#)".}
+
+proc jsCreateTextNode(d: Document; text: cstring): Node {.importjs: "#.createTextNode(#)".}
+proc createTextNode*(d: Document; text: cstring): Node =
+  if helixHydrating:
+    while helixHydrateIndex < helixHydrateQueue.len:
+      let n = helixHydrateQueue[helixHydrateIndex]
+      inc helixHydrateIndex
+      if n.nodeType == NodeText:
+        return n
+  jsCreateTextNode(d, text)
+
 proc createComment*(d: Document; text: cstring): Node {.importjs: "#.createComment(#)".}
 proc createDocumentFragment*(d: Document): Node {.importjs: "#.createDocumentFragment()".}
 
-proc appendChild*(parent, child: Node) {.importjs: "#.appendChild(#)".}
+# ---------------------------------------------------------------------------
+# appendChild wrapper that avoids moving existing SSR nodes during hydration
+# ---------------------------------------------------------------------------
+
+proc jsAppendChild(parent, child: Node) {.importjs: "#.appendChild(#)".}
+
+proc appendChild*(parent, child: Node) =
+  if helixHydrating:
+    # Skip comment anchors (if/for/case markers not present in SSR)
+    if child.nodeType == NodeComment:
+      return
+    # Skip document fragments to avoid moving pooled nodes out of the DOM
+    const NodeDocumentFragment = 11
+    if child.nodeType == NodeDocumentFragment:
+      return
+    # Skip if child is already a direct child of parent
+    if child.parentNode == parent:
+      return
+    # Don't move nodes that are already in the document elsewhere
+    if child.parentNode != nil:
+      return
+  jsAppendChild(parent, child)
+
 proc insertBefore*(parent, newChild, refChild: Node) {.importjs: "#.insertBefore(#, #)".}
 proc removeChild*(parent, child: Node) {.importjs: "#.removeChild(#)".}
 proc replaceChild*(parent, newChild, oldChild: Node) {.importjs: "#.replaceChild(#, #)".}
@@ -47,18 +131,9 @@ proc querySelectorAll*(e: Element; sel: cstring): seq[Element] {.importjs: "#.qu
 
 proc firstChild*(n: Node): Node {.importjs: "#.firstChild".}
 proc nextSibling*(n: Node): Node {.importjs: "#.nextSibling".}
-proc parentNode*(n: Node): Node {.importjs: "#.parentNode".}
-proc childNodes*(n: Node): seq[Node] {.importjs: "#.childNodes".}
-
-proc nodeType*(n: Node): int {.importjs: "#.nodeType".}
 proc nodeValue*(n: Node): cstring {.importjs: "#.nodeValue".}
 proc `nodeValue=`*(n: Node; v: cstring) {.importjs: "#.nodeValue = #".}
 
 proc target*(ev: Event): Element {.importjs: "#.target".}
 proc value*(e: Element): cstring {.importjs: "#.value".}
 proc `value=`*(e: Element; v: cstring) {.importjs: "#.value = #".}
-
-const
-  NodeElement* = 1
-  NodeText* = 3
-  NodeComment* = 8

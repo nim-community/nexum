@@ -194,6 +194,7 @@ proc genNode(ir: IrNode; state: var ClientGenState; parentVar: string;
   of nkFor:
     if parentVar != "":
       let anchorVar = state.nextVar()
+      let prevNodesVar = state.nextVar("prevNodes")
       stmts.add(newLetStmt(
         ident(anchorVar),
         newCall(newDotExpr(ident"document", ident"createComment"), newLit"for")
@@ -202,10 +203,43 @@ proc genNode(ir: IrNode; state: var ClientGenState; parentVar: string;
         newDotExpr(ident(parentVar), ident"appendChild"),
         ident(anchorVar)
       ))
+      stmts.add(newLetStmt(
+        ident(prevNodesVar),
+        newCall(newTree(nnkBracketExpr, ident"newSeq", ident"Node"))
+      ))
+
+      var effectBody = newStmtList()
+
+      # Remove previously-created nodes before re-rendering
+      let oldNodeVar = state.nextVar("oldNode")
+      effectBody.add(newTree(nnkForStmt,
+        ident(oldNodeVar),
+        ident(prevNodesVar),
+        newStmtList(
+          newIfStmt((
+            newTree(nnkInfix, ident"!=", newDotExpr(ident(oldNodeVar), ident"parentNode"), newNilLit()),
+            newStmtList(
+              newCall(
+                newDotExpr(newDotExpr(ident(oldNodeVar), ident"parentNode"), ident"removeChild"),
+                ident(oldNodeVar)
+              )
+            )
+          ))
+        )
+      ))
+      effectBody.add(newCall(newDotExpr(ident(prevNodesVar), ident"setLen"), newLit(0)))
+
       var forBodyStmts: seq[NimNode] = @[]
+      var nodeVars: seq[string] = @[]
       for ch in ir.forBody:
-        discard genNode(ch, state, parentVar, forBodyStmts)
-      stmts.add(newTree(nnkForStmt, ir.forVar, ir.forIterable, newStmtList(forBodyStmts)))
+        let nodeVar = genNode(ch, state, parentVar, forBodyStmts)
+        nodeVars.add(nodeVar)
+      for nv in nodeVars:
+        forBodyStmts.add(newCall(newDotExpr(ident(prevNodesVar), ident"add"), ident(nv)))
+
+      effectBody.add(newTree(nnkForStmt, ir.forVar, ir.forIterable, newStmtList(forBodyStmts)))
+
+      stmts.add(newCall(ident"createEffect", newProc(body = effectBody, procType = nnkLambda)))
       result = anchorVar
     else:
       let fragVar = state.nextVar()

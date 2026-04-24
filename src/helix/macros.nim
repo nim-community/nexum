@@ -39,20 +39,24 @@ macro island*(p: untyped): untyped =
 
   when defined(js):
     let name = $p[0]
-    # Add module-level registration of the hydration factory.
-    # For now the factory does a fresh mount (true hydration walk is TODO).
+    # Register a hydration factory that reuses the existing SSR DOM.
+    # It runs the component proc with DOM creation intercepted so that
+    # `document.createElement` / `createTextNode` return existing nodes
+    # from the SSR tree instead of creating fresh ones. Effects and event
+    # listeners are thereby attached directly to the preserved DOM.
     let factory = newProc(
       params = @[newEmptyNode(),
         newIdentDefs(ident"props", ident"JsonNode"),
         newIdentDefs(ident"root", ident"Element")],
-      body = newStmtList(
-        newAssignment(
-          newDotExpr(ident"root", ident"innerHTML"),
-          newCall(ident"cstring", newLit"")
-        ),
-        newCall(
-          newDotExpr(ident"root", ident"appendChild"),
+      body = newTree(nnkTryStmt,
+        newStmtList(
+          newCall(ident"startHydration", ident"root"),
           newCall(ident(name))
+        ),
+        newTree(nnkFinally,
+          newStmtList(
+            newCall(ident"stopHydration")
+          )
         )
       ),
       procType = nnkLambda
