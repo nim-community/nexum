@@ -29,10 +29,13 @@ jobs:
       - name: Build site
         run: nim c -r --path:"src" site/build.nim
 
+      - name: Copy dist to docs
+        run: cp -r dist docs
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./docs
 
   deploy:
     needs: build
