@@ -3,17 +3,9 @@
 import nexum
 import nexum/compiler/buildhtml
 
-# ---------------------------------------------------------------------------
-# Shared helpers
-# ---------------------------------------------------------------------------
-
 proc NavLink(href, text: string): auto =
   buildHtml:
     a(class = "nav-link", href = href): text
-
-# ---------------------------------------------------------------------------
-# Components
-# ---------------------------------------------------------------------------
 
 proc HeroSection(): auto =
   buildHtml:
@@ -26,7 +18,7 @@ proc HeroSection(): auto =
       span(class = "badge"): "Experimental · Design Phase"
       `div`(class = "hero-cta"):
         a(href = "#quickstart", class = "btn-primary"): "Get Started"
-        a(href = "https://github.com/nim-works/nexum", class = "btn-secondary"): "GitHub"
+        a(href = "https://github.com/nim-community/nexum", class = "btn-secondary", target = "_blank"): "GitHub"
 
 proc WhatIsSection(): auto =
   buildHtml:
@@ -226,11 +218,11 @@ proc QuickstartSection(): auto =
           button(class = "copy-btn", data-clipboard = "nimble install nexum"): "Copy"
         h3: "Define a component"
         `div`(class = "code-snippet"):
-          pre: "proc greeting(): auto =\n  buildHtml:\n    h1: \"Hello, Nexum\""
-          button(class = "copy-btn", data-clipboard = "proc greeting(): auto =\n  buildHtml:\n    h1: \"Hello, Nexum\""): "Copy"
+          pre: "proc greeting(): auto =\n  buildHtml:\n    h2: \"Hello, Nexum\""
+          button(class = "copy-btn", data-clipboard = "proc greeting(): auto =\n  buildHtml:\n    h2: \"Hello, Nexum\""): "Copy"
         h3: "Render on the server"
         `div`(class = "code-snippet"):
-          pre: "echo greeting()  # → <h1>Hello, Nexum</h1>"
+          pre: "echo greeting()  # → <h2>Hello, Nexum</h2>"
           button(class = "copy-btn", data-clipboard = "echo greeting()"): "Copy"
 
 proc FooterSection(): auto =
@@ -247,14 +239,10 @@ proc FooterSection(): auto =
           a(href = "#internals"): "Internals"
         `div`(class = "footer-col"):
           h4: "Community"
-          a(href = "https://github.com/nim-works/nexum"): "GitHub"
-          a(href = "https://github.com/nim-works/nexum/issues"): "Issues"
+          a(href = "https://github.com/nim-community/nexum", target = "_blank"): "GitHub"
+          a(href = "https://github.com/nim-community/nexum/issues", target = "_blank"): "Issues"
       `div`(class = "footer-bottom"):
         p: "Built with Nexum — AGPL-3.0"
-
-# ---------------------------------------------------------------------------
-# Page
-# ---------------------------------------------------------------------------
 
 proc indexPage*(): auto =
   buildHtml:
@@ -278,7 +266,7 @@ proc indexPage*(): auto =
               NavLink("#examples", "Examples")
               NavLink("#internals", "Internals")
               NavLink("#quickstart", "Get Started")
-              a(href = "https://github.com/nim-works/nexum", class = "nav-link nav-link-gh"): "GitHub"
+              a(href = "https://github.com/nim-community/nexum", class = "nav-link nav-link-gh", target = "_blank"): "GitHub"
         HeroSection()
         WhatIsSection()
         ExamplesSection()
