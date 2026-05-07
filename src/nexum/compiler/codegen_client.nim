@@ -203,7 +203,7 @@ proc genNode(ir: IrNode; state: var ClientGenState; parentVar: string;
         newDotExpr(ident(parentVar), ident"appendChild"),
         ident(anchorVar)
       ))
-      stmts.add(newLetStmt(
+      stmts.add(newVarStmt(
         ident(prevNodesVar),
         newCall(newTree(nnkBracketExpr, ident"newSeq", ident"Node"))
       ))
