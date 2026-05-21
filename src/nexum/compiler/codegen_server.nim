@@ -67,6 +67,9 @@ proc genNode(ir: IrNode; stmts: var seq[NimNode]) =
       newCall(ident"$", ir.expr)
     ))
 
+  of nkStmt:
+    stmts.add(ir.expr)
+
   of nkComponent:
     stmts.add(newCall(
       newDotExpr(ident"ctx", ident"write"),

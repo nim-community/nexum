@@ -104,6 +104,10 @@ proc genNode(ir: IrNode; state: var ClientGenState; parentVar: string;
       ))
     result = varName
 
+  of nkStmt:
+    stmts.add(ir.expr)
+    result = ""
+
   of nkComponent, nkIsland:
     let varName = state.nextVar()
     stmts.add(newLetStmt(ident(varName), ir.compProps))

@@ -13,7 +13,8 @@ type
     nkIf        ## if / elif / else
     nkFor       ## for loop
     nkCase      ## case / of
-    nkExpr      ## raw Nim expression node
+    nkExpr,     ## raw Nim expression node
+    nkStmt      ## raw Nim statement (let, var, etc.)
 
   AttrValueKind* = enum
     avStatic  ## string literal
@@ -54,7 +55,7 @@ type
     of nkCase:
       caseDisc*: NimNode
       caseBranches*: seq[tuple[values: seq[NimNode], body: seq[IrNode]]]
-    of nkExpr:
+    of nkExpr, nkStmt:
       expr*: NimNode
 
 proc parseError(msg: string; n: NimNode) {.noreturn.} =
@@ -83,6 +84,9 @@ proc parseStmt(n: NimNode): IrNode =
   case n.kind
   of nnkStrLit..nnkTripleStrLit:
     result = IrNode(kind: nkText, textStatic: n.strVal)
+
+  of nnkLetSection, nnkVarSection:
+    result = IrNode(kind: nkStmt, expr: n)
 
   of nnkIfStmt:
     result = IrNode(kind: nkIf, ifBranches: @[], ifElse: @[])
