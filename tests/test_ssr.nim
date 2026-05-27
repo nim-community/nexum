@@ -64,6 +64,34 @@ suite "SSR Renderer":
     check html.contains("<li>2</li>")
     check html.contains("<li>3</li>")
 
+  test "buildHtml let inside for loop":
+    proc TestLetInFor(): auto =
+      let items = @["a", "b", "c"]
+      buildHtml:
+        ul:
+          for i in 0 ..< items.len:
+            let item = items[i]
+            li: item
+    let html = TestLetInFor()
+    check html.contains("<li>a</li>")
+    check html.contains("<li>b</li>")
+    check html.contains("<li>c</li>")
+
+  test "buildHtml let inside if inside for loop":
+    proc TestLetInIfInFor(): auto =
+      let items = @[(code: "x", amount: 100.0), (code: "y", amount: 0.0)]
+      buildHtml:
+        `div`(class = "list"):
+          for it in items:
+            let amt = it.amount
+            if amt > 0:
+              span(class = "pos"): it.code
+            else:
+              span(class = "zero"): it.code
+    let html = TestLetInIfInFor()
+    check html.contains("<span class=\"pos\">x</span>")
+    check html.contains("<span class=\"zero\">y</span>")
+
   test "buildHtml case statement":
     let color = 2
     proc TestCase(): auto =
