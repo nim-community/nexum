@@ -1,24 +1,38 @@
 ## Nexum Runtime — Thin DOM abstraction for JS target.
+## Wraps js/dom with hydration-aware DOM creation.
 
 when not defined(js):
   {.error: "dom.nim targets JS only".}
 
-# Re-export or wrap minimal browser APIs so Nexum does not depend on karax/kdom.
+import js/dom as stdDom
 
-type
-  Node* = ref object of RootObj
-  Element* = ref object of Node
-  Document* = ref object of Node
-  Event* = ref object of RootObj
-  Window* = ref object of RootObj
+# Re-export types from std/js/dom
+export stdDom.Node, stdDom.Element, stdDom.Document, stdDom.Event, stdDom.Window
+export stdDom.NodeType, stdDom.ClassList, stdDom.Style, stdDom.BoundingRect
+export stdDom.KeyboardEvent, stdDom.MouseEvent, stdDom.UIEvent
+export stdDom.TimeOut, stdDom.Interval
+export stdDom.AddEventListenerOptions, stdDom.ScrollIntoViewOptions
 
-var document* {.importjs, nodecl.}: Document
-var window* {.importjs, nodecl.}: Window
+# Re-export ClassList methods with specific names to avoid ambiguity
+proc classListAdd*(e: Element, class: cstring) {.importjs: "#.classList.add(#)".}
+proc classListRemove*(e: Element, class: cstring) {.importjs: "#.classList.remove(#)".}
+proc classListContains*(e: Element, class: cstring): bool {.importjs: "#.classList.contains(#)".}
+proc classListToggle*(e: Element, class: cstring): bool {.importjs: "#.classList.toggle(#)".}
 
-const
-  NodeElement* = 1
-  NodeText* = 3
-  NodeComment* = 8
+# Re-export globals
+export stdDom.document, stdDom.window
+
+# Re-export non-conflicting procs
+export stdDom.querySelector, stdDom.querySelectorAll
+export stdDom.getElementById
+export stdDom.addEventListener, stdDom.removeEventListener
+export stdDom.preventDefault, stdDom.stopImmediatePropagation, stdDom.stopPropagation
+export stdDom.closest
+export stdDom.scrollIntoView
+export stdDom.getBoundingClientRect
+export stdDom.setTimeout, stdDom.clearTimeout, stdDom.setInterval, stdDom.clearInterval
+export stdDom.encodeURIComponent, stdDom.decodeURIComponent
+export stdDom.requestAnimationFrame, stdDom.cancelAnimationFrame
 
 # ---------------------------------------------------------------------------
 # Hydration mode: intercept DOM creation to reuse existing SSR nodes
@@ -28,15 +42,8 @@ var nexumHydrating*: bool = false
 var nexumHydrateQueue*: seq[Node] = @[]
 var nexumHydrateIndex*: int = 0
 
-proc childNodes*(n: Node): seq[Node] {.importjs: "#.childNodes".}
-proc nodeType*(n: Node): int {.importjs: "#.nodeType".}
-proc parentNode*(n: Node): Node {.importjs: "#.parentNode".}
-
 proc startHydration*(root: Element) =
   ## Enter hydration mode for an island root.
-  ## Collects all nodes in DFS pre-order so that `createElement`/
-  ## `createTextNode` calls can return existing SSR nodes instead of
-  ## creating fresh ones.
   nexumHydrating = true
   nexumHydrateQueue = @[]
   nexumHydrateIndex = 0
@@ -44,9 +51,8 @@ proc startHydration*(root: Element) =
   while stack.len > 0:
     let n = stack.pop()
     nexumHydrateQueue.add(n)
-    let children = childNodes(n)
-    for i in countdown(children.high, 0):
-      stack.add(children[i])
+    for i in countdown(n.childNodes.len - 1, 0):
+      stack.add(n.childNodes[i])
 
 proc stopHydration*() =
   ## Exit hydration mode and clean up.
@@ -55,7 +61,7 @@ proc stopHydration*() =
   nexumHydrateIndex = 0
 
 # ---------------------------------------------------------------------------
-# DOM creation wrappers that consume the hydration queue when active
+# Hydration-aware DOM creation wrappers
 # ---------------------------------------------------------------------------
 
 proc jsCreateElement(d: Document; tag: cstring): Element {.importjs: "#.createElement(#)".}
@@ -64,11 +70,9 @@ proc createElement*(d: Document; tag: cstring): Element =
     while nexumHydrateIndex < nexumHydrateQueue.len:
       let n = nexumHydrateQueue[nexumHydrateIndex]
       inc nexumHydrateIndex
-      if n.nodeType == NodeElement:
+      if n.nodeType == ElementNode:
         return cast[Element](n)
   jsCreateElement(d, tag)
-
-proc createElementNS*(d: Document; ns, tag: cstring): Element {.importjs: "#.createElementNS(#, #)".}
 
 proc jsCreateTextNode(d: Document; text: cstring): Node {.importjs: "#.createTextNode(#)".}
 proc createTextNode*(d: Document; text: cstring): Node =
@@ -76,38 +80,28 @@ proc createTextNode*(d: Document; text: cstring): Node =
     while nexumHydrateIndex < nexumHydrateQueue.len:
       let n = nexumHydrateQueue[nexumHydrateIndex]
       inc nexumHydrateIndex
-      if n.nodeType == NodeText:
+      if n.nodeType == TextNode:
         return n
   jsCreateTextNode(d, text)
 
-proc createComment*(d: Document; text: cstring): Node {.importjs: "#.createComment(#)".}
-proc createDocumentFragment*(d: Document): Node {.importjs: "#.createDocumentFragment()".}
-
-# ---------------------------------------------------------------------------
-# appendChild wrapper that avoids moving existing SSR nodes during hydration
-# ---------------------------------------------------------------------------
-
 proc jsAppendChild(parent, child: Node) {.importjs: "#.appendChild(#)".}
-
 proc appendChild*(parent, child: Node) =
   if nexumHydrating:
-    # Skip comment anchors (if/for/case markers not present in SSR)
-    if child.nodeType == NodeComment:
+    if child.nodeType == CommentNode:
       return
-    # Skip document fragments to avoid moving pooled nodes out of the DOM
-    const NodeDocumentFragment = 11
-    if child.nodeType == NodeDocumentFragment:
+    if child.nodeType == DocumentFragmentNode:
       return
-    # Skip if child is already a direct child of parent
     if child.parentNode == parent:
       return
-    # Don't move nodes that are already in the document elsewhere
     if child.parentNode != nil:
       return
   jsAppendChild(parent, child)
 
+proc jsRemoveChild(parent, child: Node) {.importjs: "#.removeChild(#)".}
+proc removeChild*(parent, child: Node) =
+  jsRemoveChild(parent, child)
+
 proc insertBefore*(parent, newChild, refChild: Node) {.importjs: "#.insertBefore(#, #)".}
-proc removeChild*(parent, child: Node) {.importjs: "#.removeChild(#)".}
 proc replaceChild*(parent, newChild, oldChild: Node) {.importjs: "#.replaceChild(#, #)".}
 
 proc setAttr*(e: Element; name, value: cstring) {.importjs: "#.setAttribute(#, #)".}
@@ -120,21 +114,6 @@ proc textContent*(n: Node): cstring {.importjs: "#.textContent".}
 proc `textContent=`*(n: Node; v: cstring) {.importjs: "#.textContent = #".}
 proc innerHTML*(e: Element): cstring {.importjs: "#.innerHTML".}
 proc `innerHTML=`*(e: Element; v: cstring) {.importjs: "#.innerHTML = #".}
-
-proc addEventListener*(e: Element|Window|Document; ev: cstring; handler: proc(ev: Event);
-    capture = false) {.importjs: "#.addEventListener(#, #, #)".}
-proc removeEventListener*(e: Element|Window|Document; ev: cstring; handler: proc(
-    ev: Event)) {.importjs: "#.removeEventListener(#, #)".}
-
-proc querySelector*(d: Document; sel: cstring): Element {.importjs: "#.querySelector(#)".}
-proc querySelectorAll*(d: Document; sel: cstring): seq[Element] {.importjs: "#.querySelectorAll(#)".}
-proc querySelector*(e: Element; sel: cstring): Element {.importjs: "#.querySelector(#)".}
-proc querySelectorAll*(e: Element; sel: cstring): seq[Element] {.importjs: "#.querySelectorAll(#)".}
-
-proc firstChild*(n: Node): Node {.importjs: "#.firstChild".}
-proc nextSibling*(n: Node): Node {.importjs: "#.nextSibling".}
-proc nodeValue*(n: Node): cstring {.importjs: "#.nodeValue".}
-proc `nodeValue=`*(n: Node; v: cstring) {.importjs: "#.nodeValue = #".}
 
 proc target*(ev: Event): Element {.importjs: "#.target".}
 proc value*(e: Element): cstring {.importjs: "#.value".}

@@ -67,7 +67,7 @@ proc scanIslands*(doc: Document): seq[IslandMarker] =
 
   while stack.len > 0:
     let node = stack.pop()
-    if node.nodeType == NodeComment:
+    if node.nodeType == CommentNode:
       let text = $node.nodeValue
       if text.startsWith(IslandStartPrefix):
         let parsed = parseIslandStart(text)
@@ -76,9 +76,9 @@ proc scanIslands*(doc: Document): seq[IslandMarker] =
           marker.startComment = node
           var curr = node.nextSibling
           while curr != nil:
-            if curr.nodeType == NodeElement and marker.rootElement == nil:
+            if curr.nodeType == ElementNode and marker.rootElement == nil:
               marker.rootElement = cast[Element](curr)
-            elif curr.nodeType == NodeComment:
+            elif curr.nodeType == CommentNode:
               let endText = $curr.nodeValue
               if endText.startsWith(IslandEndPrefix):
                 let expected = IslandEndPrefix & marker.id & "\""
