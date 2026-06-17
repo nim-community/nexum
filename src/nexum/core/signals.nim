@@ -39,6 +39,7 @@ var
   queueScheduled*: bool = false
   batchDepth*: int = 0
   sourceUidCounter*: int = 0
+  onEffectCreated*: proc(e: Effect) = nil  ## scope.nim hooks this to track effects
 
 # ---------------------------------------------------------------------------
 # Hash support for ref objects in HashSet
@@ -142,6 +143,8 @@ proc value*[T](s: Signal[T]): T = s.get(track)
 
 proc createEffect*(fn: EffectFn) =
   let e = Effect(fn: fn)
+  if onEffectCreated != nil:
+    onEffectCreated(e)
   proc run() =
     cleanupEffect(e)
     let prev = currentEffect

@@ -11,6 +11,11 @@ type
 
 var currentScope*: Scope = nil
 
+# Wire up effect tracking so scope.dispose() can clean up effects
+onEffectCreated = proc(e: Effect) =
+  if currentScope != nil:
+    currentScope.effects.add(e)
+
 proc newScope*(parent: Scope = nil): Scope =
   Scope(parent: parent)
 
@@ -32,6 +37,7 @@ proc dispose*(s: Scope) =
   for e in s.effects:
     e.disposed = true
     cleanupEffect(e)
+  s.effects.setLen(0)
   for cl in s.cleanups:
     cl()
   s.cleanups.setLen(0)
@@ -40,4 +46,11 @@ proc runInScope*[T](s: Scope; body: proc(): T): T =
   let prev = currentScope
   currentScope = s
   result = body()
+  currentScope = prev
+
+proc runInScope*(s: Scope; body: proc()) =
+  ## Convenience overload for void-returning bodies.
+  let prev = currentScope
+  currentScope = s
+  body()
   currentScope = prev
