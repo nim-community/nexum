@@ -125,3 +125,15 @@ suite "SSR Renderer":
     let html = Page()
     check html.contains("nexum-island")
     check html.contains("MyIsland")
+
+  test "buildHtml hyphenated attribute name (infix)":
+    proc TestHyphen(): auto =
+      buildHtml:
+        span(class = "om-timestamp", data-time = "2026-06-17 18:37:13.956608+00"): "now"
+    check TestHyphen() == "<span class=\"om-timestamp\" data-time=\"2026-06-17 18:37:13.956608+00\">now</span>"
+
+  test "buildHtml backtick-quoted hyphenated attribute name":
+    proc TestHyphenQuoted(): auto =
+      buildHtml:
+        span(class = "om-timestamp", `data-time` = "v"): "now"
+    check TestHyphenQuoted() == "<span class=\"om-timestamp\" data-time=\"v\">now</span>"

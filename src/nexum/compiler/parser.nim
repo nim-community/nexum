@@ -176,10 +176,13 @@ proc parseStmt(n: NimNode): IrNode =
           let attrName = case arg[0].kind
             of nnkIdent: $arg[0]
             of nnkAccQuoted:
-              if arg[0].len > 0 and arg[0][0].kind == nnkIdent:
-                $arg[0][0]
-              else:
-                parseError("unsupported quoted attribute name", arg)
+              proc quotedAttrName(q: NimNode): string =
+                for child in q:
+                  case child.kind
+                  of nnkIdent: result.add($child)
+                  else: parseError("unsupported quoted attribute name", arg)
+              if arg[0].len > 0: quotedAttrName(arg[0])
+              else: parseError("unsupported quoted attribute name", arg)
             of nnkInfix:
               if $arg[0][0] == "-":
                 $arg[0][1] & "-" & $arg[0][2]
