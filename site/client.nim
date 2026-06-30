@@ -26,7 +26,7 @@ when defined(js):
         h4: "Data Binding"
         `div`(class = "demo-input-row"):
           label: "Your name:"
-          input(type = "text", oninput = proc(ev: Event) = name.set($ev.target.value))
+          input(type = "text", oninput = proc(ev: Event) = name.set($cast[Element](ev.target).value))
         p:
           "Hello, " & $name() & "!"
         p(class = "demo-meta"):
