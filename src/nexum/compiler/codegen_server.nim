@@ -8,6 +8,15 @@
 import std/macros
 import parser, analyzer
 
+## HTML void elements: no children, no closing tag (HTML5 spec).
+const voidElements* = ["area", "base", "br", "col", "embed", "hr", "img",
+                       "input", "link", "meta", "param", "source", "track", "wbr"]
+
+proc isVoidTag*(tag: string): bool =
+  for v in voidElements:
+    if tag == v: return true
+  false
+
 proc genNode(ir: IrNode; stmts: var seq[NimNode]) =
   case ir.kind
   of nkElement:
@@ -38,21 +47,23 @@ proc genNode(ir: IrNode; stmts: var seq[NimNode]) =
       of avEvent:
         # Events are client-only; skip on server
         discard
+    let isVoid = isVoidTag(ir.tag)
     stmts.add(newCall(
       newDotExpr(ident"ctx", ident"write"),
       newLit(">")
     ))
-    for ch in ir.children:
-      genNode(ch, stmts)
-    stmts.add(newCall(
-      newDotExpr(ident"ctx", ident"write"),
-      newLit("</" & ir.tag & ">")
-    ))
+    if not isVoid:
+      for ch in ir.children:
+        genNode(ch, stmts)
+      stmts.add(newCall(
+        newDotExpr(ident"ctx", ident"write"),
+        newLit("</" & ir.tag & ">")
+      ))
 
   of nkText:
     if ir.textExpr != nil:
       stmts.add(newCall(
-        newDotExpr(ident"ctx", ident"writeEscaped"),
+        newDotExpr(ident"ctx", ident"writeText"),
         newCall(ident"$", ir.textExpr)
       ))
     else:
@@ -63,7 +74,7 @@ proc genNode(ir: IrNode; stmts: var seq[NimNode]) =
 
   of nkExpr:
     stmts.add(newCall(
-      newDotExpr(ident"ctx", ident"writeEscaped"),
+      newDotExpr(ident"ctx", ident"writeText"),
       newCall(ident"$", ir.expr)
     ))
 

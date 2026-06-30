@@ -21,13 +21,26 @@ proc write*(ctx: RenderContext; s: string) =
   ctx.buf.add(s)
 
 proc writeEscaped*(ctx: RenderContext; s: string) =
-  ## Basic HTML escaping for text content.
+  ## HTML escaping for **attribute values** (double-quoted).
+  ## Escapes `&`, `<`, `>`, and `"` so values are safe inside `"..."`.
   for c in s:
     case c
     of '<': ctx.buf.add("&lt;")
     of '>': ctx.buf.add("&gt;")
     of '&': ctx.buf.add("&amp;")
     of '"': ctx.buf.add("&quot;")
+    else: ctx.buf.add(c)
+
+proc writeText*(ctx: RenderContext; s: string) =
+  ## HTML escaping for **text content** (element children).
+  ## Per the HTML spec, only `&`, `<`, and `>` need escaping in text nodes;
+  ## `"` is a literal character here and is left untouched. This avoids
+  ## needlessly bloating embedded JSON / structured data with `&quot;`.
+  for c in s:
+    case c
+    of '<': ctx.buf.add("&lt;")
+    of '>': ctx.buf.add("&gt;")
+    of '&': ctx.buf.add("&amp;")
     else: ctx.buf.add(c)
 
 proc writeIslandStart*(ctx: RenderContext; id: string; props: JsonNode) =

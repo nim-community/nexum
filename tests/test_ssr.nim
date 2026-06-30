@@ -137,3 +137,36 @@ suite "SSR Renderer":
       buildHtml:
         span(class = "om-timestamp", `data-time` = "v"): "now"
     check TestHyphenQuoted() == "<span class=\"om-timestamp\" data-time=\"v\">now</span>"
+
+  test "writeText escapes only & < > (not \") for text content":
+    let ctx = newRenderContext()
+    ctx.writeText("a<b>c & d\"e>f")
+    check ctx.buf == "a&lt;b&gt;c &amp; d\"e&gt;f"
+
+  test "writeEscaped still escapes \" for attribute values":
+    let ctx = newRenderContext()
+    ctx.writeEscaped("x\"y<z&w")
+    check ctx.buf == "x&quot;y&lt;z&amp;w"
+
+  test "buildHtml text content does not bloat quotes (JSON embedding)":
+    let json = "{\"name\":\"A<B&b\"}"
+    proc Embed(): auto =
+      buildHtml:
+        `div`(id = "ssr-x", style = "display:none;"): json
+    let html = Embed()
+    check html == "<div id=\"ssr-x\" style=\"display:none;\">{\"name\":\"A&lt;B&amp;b\"}</div>"
+
+  test "buildHtml void elements emit no closing tag":
+    proc Head(): auto =
+      buildHtml:
+        link(rel = "stylesheet", href = "/style.css")
+        meta(name = "viewport", content = "width=device-width")
+        img(src = "/logo.png", alt = "logo")
+    let html = Head()
+    check html == "<link rel=\"stylesheet\" href=\"/style.css\"><meta name=\"viewport\" content=\"width=device-width\"><img src=\"/logo.png\" alt=\"logo\">"
+
+  test "buildHtml non-void elements still close normally":
+    proc Box(): auto =
+      buildHtml:
+        `div`(class = "box"): "hi"
+    check Box() == "<div class=\"box\">hi</div>"
