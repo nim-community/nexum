@@ -85,8 +85,12 @@ proc parseStmt(n: NimNode): IrNode =
   of nnkStrLit..nnkTripleStrLit:
     result = IrNode(kind: nkText, textStatic: n.strVal)
 
-  of nnkLetSection, nnkVarSection:
+  of nnkLetSection, nnkVarSection, nnkContinueStmt, nnkBreakStmt,
+     nnkReturnStmt, nnkRaiseStmt, nnkDiscardStmt, nnkAsgn, nnkCommentStmt:
+    # Raw statements (declarations, assignments, control flow) pass through
+    # unchanged so they keep their Nim semantics inside if/for/case bodies.
     result = IrNode(kind: nkStmt, expr: n)
+
 
   of nnkIfStmt:
     result = IrNode(kind: nkIf, ifBranches: @[], ifElse: @[])

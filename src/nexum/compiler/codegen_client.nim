@@ -95,6 +95,11 @@ proc genNode(ir: IrNode; state: var ClientGenState; parentVar: string;
     result = varName
 
   of nkExpr:
+    # A raw expression in template position. On the client this is appended
+    # directly as a DOM node (the caller is responsible for passing a Node,
+    # e.g. a pre-created text node: `let t = createTextNode(""); ... t`).
+    # For dynamic *string* text, use the `$expr` prefix (parsed as nkText) or
+    # string concatenation with `&` -- both of which create proper text nodes.
     let varName = state.nextVar()
     stmts.add(newLetStmt(ident(varName), ir.expr))
     if parentVar != "":
@@ -237,7 +242,10 @@ proc genNode(ir: IrNode; state: var ClientGenState; parentVar: string;
       var nodeVars: seq[string] = @[]
       for ch in ir.forBody:
         let nodeVar = genNode(ch, state, parentVar, forBodyStmts)
-        nodeVars.add(nodeVar)
+        # nkStmt (let/var/continue/etc.) returns "" — they emit no DOM node, so
+        # don't track them in prevNodes (avoids ident("") build errors).
+        if nodeVar.len > 0:
+          nodeVars.add(nodeVar)
       for nv in nodeVars:
         forBodyStmts.add(newCall(newDotExpr(ident(prevNodesVar), ident"add"), ident(nv)))
 

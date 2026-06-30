@@ -92,6 +92,41 @@ suite "SSR Renderer":
     check html.contains("<span class=\"pos\">x</span>")
     check html.contains("<span class=\"zero\">y</span>")
 
+  test "buildHtml continue inside for loop":
+    proc TestContinue(): auto =
+      let items = @["a", "b", "skip", "c"]
+      buildHtml:
+        ul:
+          for s in items:
+            if s == "skip":
+              continue
+            li: s
+    let html = TestContinue()
+    check html.contains("<li>a</li>")
+    check html.contains("<li>b</li>")
+    check html.contains("<li>c</li>")
+    check not html.contains("skip")
+
+  test "buildHtml bare identifier as dynamic text":
+    proc TestBareIdent(name: string): auto =
+      buildHtml:
+        span(class = "x"): name
+    check TestBareIdent("hello") == "<span class=\"x\">hello</span>"
+
+  test "buildHtml break inside for loop":
+    proc TestBreak(): auto =
+      let items = @["a", "b", "stop", "c"]
+      buildHtml:
+        ul:
+          for s in items:
+            if s == "stop":
+              break
+            li: s
+    let html = TestBreak()
+    check html.contains("<li>a</li>")
+    check html.contains("<li>b</li>")
+    check not html.contains("<li>c</li>")
+
   test "buildHtml case statement":
     let color = 2
     proc TestCase(): auto =
