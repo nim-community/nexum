@@ -5,7 +5,7 @@ license       = "AGPL-3.0"
 srcDir        = "src"
 bin           = @["nexum_cli"]
 
-requires "nim >= 2.0.0"
+requires "nim >= 2.2.0"
 
 task site, "Build the official site":
   exec "nim c -r --path:src src/nexum_cli.nim build"
