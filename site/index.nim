@@ -2,6 +2,7 @@
 
 import nexum
 import nexum/compiler/buildhtml
+import ./demos
 
 proc NavLink(href, text: string): auto =
   buildHtml:
@@ -53,56 +54,59 @@ proc CodeExample(title: string; code: string): auto =
         pre:
           code(class = "language-nim"): code
 
-proc LiveExample(title, code: string; demoId: string): auto =
-  buildHtml:
-    `div`(class = "example-playground"):
-      `div`(class = "code-col"):
-        CodeExample(title, code)
-      `div`(class = "demo-col"):
-        `div`(class = "demo-col-label"): "Live Result"
-        `div`(id = demoId)
-
 proc ExamplesSection(): auto =
   buildHtml:
     section(class = "container", id = "examples"):
       h2: "See It In Action"
       p: "Nexum templates look like HTML but compile to zero-overhead DOM operations."
 
-      LiveExample("Reactive signals",
-        "let count = signal(0)\n" &
-        "\n" &
-        "proc Counter(): auto =\n" &
-        "  buildHtml:\n" &
-        "    button(\n" &
-        "      onclick = proc(ev: Event) = count.set(count() + 1)\n" &
-        "    ): \"Clicked \" & $count() & \" times\"",
-        "demo-counter")
+      `div`(class = "example-playground"):
+        `div`(class = "code-col"):
+          CodeExample("Reactive signals",
+            "let count = signal(0)\n" &
+            "\n" &
+            "proc Counter(): auto =\n" &
+            "  buildHtml:\n" &
+            "    button(\n" &
+            "      onclick = proc(ev: Event) = count.set(count() + 1)\n" &
+            "    ): \"Clicked \" & $count() & \" times\"")
+        `div`(class = "demo-col"):
+          `div`(class = "demo-col-label"): "Live Result"
+          island CounterDemo()
 
-      LiveExample("Data binding",
-        "let name = signal(\"\")\n" &
-        "\n" &
-        "proc Greeting(): auto =\n" &
-        "  buildHtml:\n" &
-        "    input(\n" &
-        "      type = \"text\",\n" &
-        "      oninput = proc(ev: Event) =\n" &
-        "        name.set($ev.target.value)\n" &
-        "    )\n" &
-        "    p: \"Hello, \" & $name()",
-        "demo-binding")
+      `div`(class = "example-playground"):
+        `div`(class = "code-col"):
+          CodeExample("Data binding",
+            "let name = signal(\"\")\n" &
+            "\n" &
+            "proc Greeting(): auto =\n" &
+            "  buildHtml:\n" &
+            "    input(\n" &
+            "      type = \"text\",\n" &
+            "      oninput = proc(ev: Event) =\n" &
+            "        name.set($ev.target.value)\n" &
+            "    )\n" &
+            "    p: \"Hello, \" & $name()")
+        `div`(class = "demo-col"):
+          `div`(class = "demo-col-label"): "Live Result"
+          island BindingDemo()
 
-      LiveExample("Control flow",
-        "let show = signal(true)\n" &
-        "\n" &
-        "proc Conditional(): auto =\n" &
-        "  buildHtml:\n" &
-        "    if show():\n" &
-        "      p: \"Visible!\"\n" &
-        "    else:\n" &
-        "      p: \"Hidden\"\n" &
-        "    for i in 1..3:\n" &
-        "      li: $i",
-        "demo-conditional")
+      `div`(class = "example-playground"):
+        `div`(class = "code-col"):
+          CodeExample("Control flow",
+            "let show = signal(true)\n" &
+            "\n" &
+            "proc Conditional(): auto =\n" &
+            "  buildHtml:\n" &
+            "    if show():\n" &
+            "      p: \"Visible!\"\n" &
+            "    else:\n" &
+            "      p: \"Hidden\"\n" &
+            "    for i in 1..3:\n" &
+            "      li: $i")
+        `div`(class = "demo-col"):
+          `div`(class = "demo-col-label"): "Live Result"
+          island ConditionalDemo()
 
 proc UnderTheHoodSection(): auto =
   buildHtml:

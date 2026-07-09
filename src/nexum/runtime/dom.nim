@@ -41,6 +41,9 @@ export stdDom.requestAnimationFrame, stdDom.cancelAnimationFrame
 var nexumHydrating*: bool = false
 var nexumHydrateQueue*: seq[Node] = @[]
 var nexumHydrateIndex*: int = 0
+var nexumHydrationMismatch*: bool = false
+
+proc tagName*(e: Element): cstring {.importjs: "#.tagName".}
 
 proc startHydration*(root: Element) =
   ## Enter hydration mode for an island root.
@@ -71,7 +74,12 @@ proc createElement*(d: Document; tag: cstring): Element =
       let n = nexumHydrateQueue[nexumHydrateIndex]
       inc nexumHydrateIndex
       if n.nodeType == ElementNode:
-        return cast[Element](n)
+        let el = cast[Element](n)
+        if tagName(el) == tag:
+          return el
+        else:
+          nexumHydrationMismatch = true
+          break
   jsCreateElement(d, tag)
 
 proc jsCreateTextNode(d: Document; text: cstring): Node {.importjs: "#.createTextNode(#)".}
@@ -82,6 +90,9 @@ proc createTextNode*(d: Document; text: cstring): Node =
       inc nexumHydrateIndex
       if n.nodeType == TextNode:
         return n
+      else:
+        nexumHydrationMismatch = true
+        break
   jsCreateTextNode(d, text)
 
 proc jsAppendChild(parent, child: Node) {.importjs: "#.appendChild(#)".}
@@ -109,6 +120,7 @@ proc removeAttr*(e: Element; name: cstring) {.importjs: "#.removeAttribute(#)".}
 proc getAttr*(e: Element; name: cstring): cstring {.importjs: "#.getAttribute(#)".}
 proc className*(e: Element): cstring {.importjs: "#.className".}
 proc `className=`*(e: Element; v: cstring) {.importjs: "#.className = #".}
+proc nodeValue*(n: Node): cstring {.importjs: "#.nodeValue".}
 
 proc textContent*(n: Node): cstring {.importjs: "#.textContent".}
 proc `textContent=`*(n: Node; v: cstring) {.importjs: "#.textContent = #".}

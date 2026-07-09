@@ -3,61 +3,7 @@
 ## Compiles to JS and hydrates interactive islands.
 
 import nexum
-import nexum/compiler/buildhtml
+import ./demos
 
 when defined(js):
-  # --- Counter demo ---
-  let count = signal(0)
-
-  proc CounterDemo(): auto =
-    buildHtml:
-      `div`(class = "demo-row"):
-        h4: "Signal Counter"
-        button(onclick = proc(ev: Event) = count.set(count() + 1)): "Clicked "
-        span: $count()
-        span: " times"
-
-  # --- Data binding demo ---
-  let name = signal("")
-
-  proc BindingDemo(): auto =
-    buildHtml:
-      `div`(class = "demo-row"):
-        h4: "Data Binding"
-        `div`(class = "demo-input-row"):
-          label: "Your name:"
-          input(type = "text", oninput = proc(ev: Event) = name.set($cast[Element](ev.target).value))
-        p:
-          "Hello, " & $name() & "!"
-        p(class = "demo-meta"):
-          "Characters: " & $name().len
-
-  # --- Conditional rendering demo ---
-  let show = signal(true)
-
-  proc ConditionalDemo(): auto =
-    let statusSpan = document.createElement(cstring"span")
-    statusSpan.className = cstring"demo-highlight"
-
-    let root = buildHtml:
-      `div`(class = "demo-row"):
-        h4: "Conditional Rendering"
-        button(onclick = proc(ev: Event) = show.set(not show())): "Toggle"
-        span: " Status: "
-        statusSpan
-
-    createEffect(proc() =
-      statusSpan.textContent = cstring(if show(): "✨ Visible!" else: "Hidden")
-    )
-    root
-
-  # --- Mount ---
-  proc mountDemo(id: string; factory: proc(): auto) =
-    let el = document.querySelector(cstring("#" & id))
-    if el != nil:
-      el.innerHTML = ""
-      el.appendChild(factory())
-
-  mountDemo("demo-counter", CounterDemo)
-  mountDemo("demo-binding", BindingDemo)
-  mountDemo("demo-conditional", ConditionalDemo)
+  hydrateDocument()

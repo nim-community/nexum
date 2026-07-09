@@ -41,8 +41,9 @@ type
       textExpr*: NimNode  ## if nil, text is static
     of nkComponent, nkIsland:
       compType*: string
-      compProps*: NimNode ## object constructor AST
-      compKey*: NimNode   ## optional key expr
+      compProps*: NimNode       ## object constructor AST
+      compKey*: NimNode         ## optional key expr
+      islandProps*: seq[(string, NimNode)]  ## named args for island prop serialization
     of nkFragment:
       fragmentChildren*: seq[IrNode]
     of nkIf:
@@ -64,6 +65,13 @@ proc parseError(msg: string; n: NimNode) {.noreturn.} =
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+proc extractProps(compCall: NimNode): seq[(string, NimNode)] =
+  ## Extracts named arguments (nnkExprEqExpr) from a component call AST.
+  for i in 1 ..< compCall.len:
+    let arg = compCall[i]
+    if arg.kind == nnkExprEqExpr and arg[0].kind == nnkIdent:
+      result.add(($arg[0], arg[1]))
 
 proc parseStmt(n: NimNode): IrNode
 
@@ -163,7 +171,8 @@ proc parseStmt(n: NimNode): IrNode =
           of nnkIdent: $compCallee
           else: ""
         if compName.len > 0 and compName[0] in {'A'..'Z'}:
-          result = IrNode(kind: nkIsland, compType: compName, compProps: compCall)
+          result = IrNode(kind: nkIsland, compType: compName, compProps: compCall,
+                          islandProps: extractProps(compCall))
         else:
           parseError("island expects a component call", n)
       else:

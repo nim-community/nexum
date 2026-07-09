@@ -36,7 +36,7 @@ when defined(js):
     let root = document.querySelector(cstring("#" & app.config.rootId))
     if root == nil:
       raise newException(ValueError, "Root element #" & app.config.rootId & " not found")
-    if app.config.enableHydration:
+    if app.config.enableHydration and app.config.enableIslands:
       hydrateDocument()
     else:
       root.innerHTML = ""
@@ -62,12 +62,9 @@ when defined(js):
 
     setupPopstateListener()
 
-    if app.config.enableHydration:
+    if app.config.enableHydration and app.config.enableIslands:
       currentRouteData = readHydratedData()
       hydrateDocument()
-      let (route, params) = router.match($locationPathname)
-      root.innerHTML = ""
-      root.appendChild(route.handler(params))
     else:
       renderRoute($locationPathname)
 

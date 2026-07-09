@@ -151,7 +151,7 @@ suite "SSR Renderer":
     check Outer().contains("<span>inner</span>")
 
   test "buildHtml island generates markers":
-    proc MyIsland(): auto =
+    proc MyIsland(props: JsonNode): auto =
       buildHtml:
         button: "Click"
     proc Page(): auto =
@@ -160,6 +160,27 @@ suite "SSR Renderer":
     let html = Page()
     check html.contains("nexum-island")
     check html.contains("MyIsland")
+
+  test "buildHtml island with props embeds JSON in marker":
+    proc Counter(props: JsonNode): auto =
+      buildHtml:
+        button: "Click"
+    proc Page(): auto =
+      buildHtml:
+        island Counter(initial = 5)
+    let html = Page()
+    check html.contains("nexum-island start=\"Counter\"")
+    check html.contains("{\"initial\":5}")
+
+  test "buildHtml island with multiple props":
+    proc Widget(props: JsonNode): auto =
+      buildHtml:
+        span: "Widget"
+    proc Page(): auto =
+      buildHtml:
+        island Widget(label = "hello", step = 3)
+    let html = Page()
+    check html.contains("{\"label\":\"hello\",\"step\":3}")
 
   test "buildHtml hyphenated attribute name (infix)":
     proc TestHyphen(): auto =

@@ -31,14 +31,18 @@ macro island*(p: untyped): untyped =
   ## Marks a proc as an interactive island.
   ## On the client, registers a hydration factory so that
   ## hydrateDocument() can attach signal bindings to the SSR'd DOM.
-  expectKind(p, nnkProcDef)
+  var procDef = p
+  if p.kind == nnkStmtList and p.len == 1:
+    procDef = p[0]
+  expectKind(procDef, nnkProcDef)
 
   # Define the proc normally
   result = newStmtList()
-  result.add(p)
+  result.add(procDef)
 
   when defined(js):
-    let name = $p[0]
+    let nameNode = procDef[0]
+    let name = if nameNode.kind == nnkPostfix: $nameNode[1] else: $nameNode
     # Register a hydration factory that reuses the existing SSR DOM.
     # It runs the component proc with DOM creation intercepted so that
     # `document.createElement` / `createTextNode` return existing nodes
@@ -51,7 +55,7 @@ macro island*(p: untyped): untyped =
       body = newTree(nnkTryStmt,
         newStmtList(
           newCall(ident"startHydration", ident"root"),
-          newCall(ident(name))
+          newTree(nnkDiscardStmt, newCall(ident(name), ident"props"))
       ),
       newTree(nnkFinally,
         newStmtList(

@@ -75,7 +75,7 @@ proc genNode(ir: IrNode; state: var ClientGenState; parentVar: string;
       let effectBody = newStmtList(
         newAssignment(
           newDotExpr(ident(varName), ident"textContent"),
-          newCall(ident"$", ir.textExpr)
+          newCall(ident"cstring", newCall(ident"$", ir.textExpr))
         )
       )
       stmts.add(newCall(
@@ -113,9 +113,28 @@ proc genNode(ir: IrNode; state: var ClientGenState; parentVar: string;
     stmts.add(ir.expr)
     result = ""
 
-  of nkComponent, nkIsland:
+  of nkComponent:
     let varName = state.nextVar()
     stmts.add(newLetStmt(ident(varName), ir.compProps))
+    if parentVar != "":
+      stmts.add(newCall(
+        newDotExpr(ident(parentVar), ident"appendChild"),
+        ident(varName)
+      ))
+    result = varName
+
+  of nkIsland:
+    var propsJson: NimNode
+    if ir.islandProps.len > 0:
+      var tableConstr = newTree(nnkTableConstr)
+      for (key, val) in ir.islandProps:
+        tableConstr.add(newTree(nnkExprColonExpr, newLit(key), val))
+      propsJson = newCall(ident"%*", tableConstr)
+    else:
+      propsJson = newCall(ident"newJObject")
+    let varName = state.nextVar()
+    let compCall = newCall(ident(ir.compType), propsJson)
+    stmts.add(newLetStmt(ident(varName), compCall))
     if parentVar != "":
       stmts.add(newCall(
         newDotExpr(ident(parentVar), ident"appendChild"),

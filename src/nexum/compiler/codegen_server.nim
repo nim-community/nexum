@@ -88,15 +88,22 @@ proc genNode(ir: IrNode; stmts: var seq[NimNode]) =
     ))
 
   of nkIsland:
+    var propsExpr: NimNode
+    if ir.islandProps.len > 0:
+      var tableConstr = newTree(nnkTableConstr)
+      for (key, val) in ir.islandProps:
+        tableConstr.add(newTree(nnkExprColonExpr, newLit(key), val))
+      propsExpr = newCall(ident"%*", tableConstr)
+    else:
+      propsExpr = newCall(ident"newJObject")
     stmts.add(newCall(
       newDotExpr(ident"ctx", ident"writeIslandStart"),
       newLit(ir.compType),
-      newCall(ident"newJObject")
+      propsExpr
     ))
-    # Render the island component between markers
     stmts.add(newCall(
       newDotExpr(ident"ctx", ident"write"),
-      ir.compProps
+      newCall(ident(ir.compType), propsExpr)
     ))
     stmts.add(newCall(
       newDotExpr(ident"ctx", ident"writeIslandEnd"),
